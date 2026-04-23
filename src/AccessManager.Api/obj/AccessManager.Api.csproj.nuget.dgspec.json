@@ -1,0 +1,265 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Api\\AccessManager.Api.csproj": {}
+  },
+  "projects": {
+    "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Api\\AccessManager.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Api\\AccessManager.Api.csproj",
+        "projectName": "AccessManager.Api",
+        "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Api\\AccessManager.Api.csproj",
+        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages",
+        "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Api\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "D:\\Desenvolvimento\\AccessManager\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj": {
+                "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj"
+              },
+              "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj": {
+                "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
+        "projectName": "AccessManager.Application",
+        "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
+        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages",
+        "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "D:\\Desenvolvimento\\AccessManager\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj": {
+                "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj",
+        "projectName": "AccessManager.Domain",
+        "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj",
+        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages",
+        "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "D:\\Desenvolvimento\\AccessManager\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
+        "projectName": "AccessManager.Infrastructure",
+        "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages",
+        "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "D:\\Desenvolvimento\\AccessManager\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj": {
+                "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj"
+              },
+              "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj": {
+                "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

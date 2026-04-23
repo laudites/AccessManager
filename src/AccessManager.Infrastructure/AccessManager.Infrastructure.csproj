@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccessManager.Application\AccessManager.Application.csproj" />
+    <ProjectReference Include="..\AccessManager.Domain\AccessManager.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

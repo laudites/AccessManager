@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Api", "AccessManager.Api\AccessManager.Api.csproj", "{3B3D92C5-53D2-450B-9FDE-D34679EEE834}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Api", "src\AccessManager.Api\AccessManager.Api.csproj", "{3B3D92C5-53D2-450B-9FDE-D34679EEE834}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Application", "AccessManager.Application\AccessManager.Application.csproj", "{30E86925-E9B6-4CEB-BAD1-5056876C619E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Application", "src\AccessManager.Application\AccessManager.Application.csproj", "{30E86925-E9B6-4CEB-BAD1-5056876C619E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Domain", "AccessManager.Domain\AccessManager.Domain.csproj", "{2E3AC367-F875-4A61-9C00-50FF32726EBE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Domain", "src\AccessManager.Domain\AccessManager.Domain.csproj", "{2E3AC367-F875-4A61-9C00-50FF32726EBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Infrastructure", "AccessManager.Infrastructure\AccessManager.Infrastructure.csproj", "{43983432-842A-4A6D-94D5-42C8B43ADD9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.Infrastructure", "src\AccessManager.Infrastructure\AccessManager.Infrastructure.csproj", "{43983432-842A-4A6D-94D5-42C8B43ADD9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.UnitTests", "AccessManager.UnitTests\AccessManager.UnitTests.csproj", "{9FE9612F-E4BE-4024-A749-C70907C37C0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessManager.UnitTests", "tests\AccessManager.UnitTests\AccessManager.UnitTests.csproj", "{9FE9612F-E4BE-4024-A749-C70907C37C0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

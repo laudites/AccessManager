@@ -1,0 +1,16 @@
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\bin\Debug\net8.0\AccessManager.Application.deps.json
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\bin\Debug\net8.0\AccessManager.Application.dll
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\bin\Debug\net8.0\AccessManager.Application.pdb
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\bin\Debug\net8.0\AccessManager.Domain.dll
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\bin\Debug\net8.0\AccessManager.Domain.pdb
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.csproj.AssemblyReference.cache
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.AssemblyInfoInputs.cache
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.AssemblyInfo.cs
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.csproj.CoreCompileInputs.cache
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.sourcelink.json
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessMa.4037099D.Up2Date
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.dll
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\refint\AccessManager.Application.dll
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\AccessManager.Application.pdb
+D:\Desenvolvimento\AccessManager\src\AccessManager.Application\obj\Debug\net8.0\ref\AccessManager.Application.dll
