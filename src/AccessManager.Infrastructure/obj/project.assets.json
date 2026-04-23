@@ -46,7 +46,8 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages": {}
+    "C:\\Users\\Laudites\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
@@ -54,11 +55,17 @@
       "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
       "projectName": "AccessManager.Infrastructure",
       "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages",
+      "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
       "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "D:\\Desenvolvimento\\AccessManager\\NuGet.Config"
+        "D:\\Desenvolvimento\\AccessManager\\NuGet.Config",
+        "C:\\Users\\Laudites\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
