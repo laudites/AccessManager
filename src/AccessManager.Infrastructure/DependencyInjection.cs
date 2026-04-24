@@ -1,5 +1,6 @@
 using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Servidores.Interfaces;
+using AccessManager.Application.Telas.Interfaces;
 using AccessManager.Infrastructure.Persistence;
 using AccessManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public static class DependencyInjection
 
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IServidorRepository, ServidorRepository>();
+        services.AddScoped<ITelaClienteRepository, TelaClienteRepository>();
 
         return services;
     }
