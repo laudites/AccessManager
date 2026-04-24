@@ -98,3 +98,8 @@ D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\obj\Debug\net8.0\
 D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\obj\Debug\net8.0\AccessManager.UnitTests.pdb
 D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\obj\Debug\net8.0\AccessManager.UnitTests.genruntimeconfig.cache
 D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\obj\Debug\net8.0\ref\AccessManager.UnitTests.dll
+D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\bin\Debug\net8.0\CoverletSourceRootsMapping_AccessManager.UnitTests
+D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\bin\Debug\net8.0\AccessManager.Application.dll
+D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\bin\Debug\net8.0\AccessManager.Domain.dll
+D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\bin\Debug\net8.0\AccessManager.Application.pdb
+D:\Desenvolvimento\AccessManager\tests\AccessManager.UnitTests\bin\Debug\net8.0\AccessManager.Domain.pdb

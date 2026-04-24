@@ -27,7 +27,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Laudites\\.nuget\\packages\\": {},
+    "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -36,7 +36,7 @@
       "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
       "projectName": "AccessManager.Application",
       "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
-      "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
       "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
