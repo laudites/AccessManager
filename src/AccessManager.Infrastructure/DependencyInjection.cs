@@ -1,4 +1,5 @@
 using AccessManager.Application.Clientes.Interfaces;
+using AccessManager.Application.Dashboard.Interfaces;
 using AccessManager.Application.Financeiro.Interfaces;
 using AccessManager.Application.Servidores.Interfaces;
 using AccessManager.Application.Telas.Interfaces;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<ITelaClienteRepository, TelaClienteRepository>();
         services.AddScoped<IRenovacaoTelaHistoricoRepository, RenovacaoTelaHistoricoRepository>();
         services.AddScoped<ILancamentoFinanceiroRepository, LancamentoFinanceiroRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         return services;
     }

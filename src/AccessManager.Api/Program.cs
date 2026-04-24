@@ -1,6 +1,8 @@
 using AccessManager.Infrastructure;
 using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Clientes.Services;
+using AccessManager.Application.Dashboard.Interfaces;
+using AccessManager.Application.Dashboard.Services;
 using AccessManager.Application.Financeiro.Interfaces;
 using AccessManager.Application.Financeiro.Services;
 using AccessManager.Application.Servidores.Interfaces;
@@ -15,6 +17,7 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IServidorService, ServidorService>();
 builder.Services.AddScoped<ITelaClienteService, TelaClienteService>();
 builder.Services.AddScoped<ILancamentoFinanceiroService, LancamentoFinanceiroService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty);
 
