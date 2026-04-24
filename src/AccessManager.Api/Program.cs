@@ -1,11 +1,14 @@
 using AccessManager.Infrastructure;
 using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Clientes.Services;
+using AccessManager.Application.Servidores.Interfaces;
+using AccessManager.Application.Servidores.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IServidorService, ServidorService>();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty);
 
