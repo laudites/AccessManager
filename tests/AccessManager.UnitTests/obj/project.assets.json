@@ -5508,7 +5508,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\": {},
+    "C:\\Users\\Laudites\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -5517,7 +5517,7 @@
       "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\AccessManager.UnitTests.csproj",
       "projectName": "AccessManager.UnitTests",
       "projectPath": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\AccessManager.UnitTests.csproj",
-      "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
       "outputPath": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
@@ -5593,13 +5593,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Ocorreu um erro ao obter os dados de vulnerabilidade do pacote: Não é possível carregar o índice de serviço para a origem https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }

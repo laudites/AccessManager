@@ -10,7 +10,7 @@
         "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
         "projectName": "AccessManager.Application",
         "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\AccessManager.Application.csproj",
-        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
         "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
@@ -79,7 +79,7 @@
         "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj",
         "projectName": "AccessManager.Domain",
         "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\AccessManager.Domain.csproj",
-        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
         "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
@@ -144,7 +144,7 @@
         "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
         "projectName": "AccessManager.Infrastructure",
         "projectPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\AccessManager.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
         "outputPath": "D:\\Desenvolvimento\\AccessManager\\src\\AccessManager.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
