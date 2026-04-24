@@ -1,4 +1,6 @@
+using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Infrastructure.Persistence;
+using AccessManager.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +19,8 @@ public static class DependencyInjection
 
         services.AddDbContext<AccessManagerDbContext>(options =>
             options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0))));
+
+        services.AddScoped<IClienteRepository, ClienteRepository>();
 
         return services;
     }
