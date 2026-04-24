@@ -16,3 +16,5 @@ D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\obj\Debug\net8
 D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\obj\Debug\net8.0\refint\AccessManager.Infrastructure.dll
 D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\obj\Debug\net8.0\AccessManager.Infrastructure.pdb
 D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\obj\Debug\net8.0\ref\AccessManager.Infrastructure.dll
+D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\bin\Debug\net8.0\AccessManager.Infrastructure.runtimeconfig.json
+D:\Desenvolvimento\AccessManager\src\AccessManager.Infrastructure\obj\Debug\net8.0\AccessManager.Infrastructure.genruntimeconfig.cache
