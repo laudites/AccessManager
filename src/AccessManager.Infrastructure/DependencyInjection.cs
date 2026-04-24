@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IServidorRepository, ServidorRepository>();
         services.AddScoped<ITelaClienteRepository, TelaClienteRepository>();
+        services.AddScoped<IRenovacaoTelaHistoricoRepository, RenovacaoTelaHistoricoRepository>();
 
         return services;
     }

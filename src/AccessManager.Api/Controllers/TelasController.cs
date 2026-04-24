@@ -76,4 +76,42 @@ public class TelasController(ITelaClienteService telaClienteService) : Controlle
 
         return Ok(ApiResponse.Ok());
     }
+
+    [HttpPost("{id:guid}/renovar")]
+    public async Task<IActionResult> Renovar(
+        Guid id,
+        RenovarTelaRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await telaClienteService.RenovarAsync(id, request, cancellationToken);
+        if (!result.Success)
+        {
+            var response = ApiResponse<TelaClienteDto>.Fail(result.Errors);
+
+            return result.Errors.Contains(NotFoundMessage)
+                ? NotFound(response)
+                : BadRequest(response);
+        }
+
+        return Ok(ApiResponse<TelaClienteDto>.Ok(result.Data!));
+    }
+
+    [HttpPost("{id:guid}/trocar-servidor")]
+    public async Task<IActionResult> TrocarServidor(
+        Guid id,
+        TrocarServidorRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await telaClienteService.TrocarServidorAsync(id, request, cancellationToken);
+        if (!result.Success)
+        {
+            var response = ApiResponse<TelaClienteDto>.Fail(result.Errors);
+
+            return result.Errors.Contains(NotFoundMessage)
+                ? NotFound(response)
+                : BadRequest(response);
+        }
+
+        return Ok(ApiResponse<TelaClienteDto>.Ok(result.Data!));
+    }
 }

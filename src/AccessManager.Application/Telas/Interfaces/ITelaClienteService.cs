@@ -14,5 +14,7 @@ public interface ITelaClienteService
 
     Task<OperationResult<TelaClienteDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<OperationResult<TelaClienteDto>> UpdateAsync(Guid id, UpdateTelaClienteDto dto, CancellationToken cancellationToken);
+    Task<OperationResult<TelaClienteDto>> RenovarAsync(Guid id, RenovarTelaRequest request, CancellationToken cancellationToken);
+    Task<OperationResult<TelaClienteDto>> TrocarServidorAsync(Guid id, TrocarServidorRequest request, CancellationToken cancellationToken);
     Task<OperationResult> DeleteAsync(Guid id, CancellationToken cancellationToken);
 }

@@ -10,7 +10,7 @@
         "projectUniqueName": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\AccessManager.UnitTests.csproj",
         "projectName": "AccessManager.UnitTests",
         "projectPath": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\AccessManager.UnitTests.csproj",
-        "packagesPath": "C:\\Users\\Laudites\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\Laudites\\AppData\\Local\\Temp\\.nuget\\packages\\",
         "outputPath": "D:\\Desenvolvimento\\AccessManager\\tests\\AccessManager.UnitTests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [

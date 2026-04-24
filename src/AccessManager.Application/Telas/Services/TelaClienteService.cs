@@ -10,6 +10,7 @@ namespace AccessManager.Application.Telas.Services;
 
 public class TelaClienteService(
     ITelaClienteRepository telaClienteRepository,
+    IRenovacaoTelaHistoricoRepository renovacaoTelaHistoricoRepository,
     IClienteRepository clienteRepository,
     IServidorRepository servidorRepository) : ITelaClienteService
 {
@@ -133,6 +134,101 @@ public class TelaClienteService(
         return OperationResult<TelaClienteDto>.Ok(MapToDto(telaCliente));
     }
 
+    public async Task<OperationResult<TelaClienteDto>> RenovarAsync(
+        Guid id,
+        RenovarTelaRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validationErrors = ValidateRenovacao(request);
+        if (validationErrors.Count > 0)
+        {
+            return OperationResult<TelaClienteDto>.Fail(validationErrors.ToArray());
+        }
+
+        var telaCliente = await telaClienteRepository.GetByIdAsync(id, cancellationToken);
+        if (telaCliente is null)
+        {
+            return OperationResult<TelaClienteDto>.Fail(NotFoundMessage);
+        }
+
+        var dataVencimentoAnterior = telaCliente.DataVencimentoTecnico;
+        var valorAcordadoAnterior = telaCliente.ValorAcordado;
+        var valorAcordadoNovo = request.ValorAcordadoNovo ?? telaCliente.ValorAcordado;
+
+        telaCliente.DataVencimentoTecnico = request.NovaDataVencimentoTecnico!.Value;
+        telaCliente.ValorAcordado = valorAcordadoNovo;
+
+        var historico = new RenovacaoTelaHistorico
+        {
+            Id = Guid.NewGuid(),
+            TelaClienteId = telaCliente.Id,
+            ClienteId = telaCliente.ClienteId,
+            ServidorAnteriorId = null,
+            ServidorNovoId = null,
+            DataVencimentoTecnicoAnterior = dataVencimentoAnterior,
+            NovaDataVencimentoTecnico = telaCliente.DataVencimentoTecnico,
+            ValorAcordadoAnterior = valorAcordadoAnterior,
+            ValorAcordadoNovo = valorAcordadoNovo,
+            Observacao = NormalizeOptionalText(request.Observacao),
+            DataCriacao = DateTime.UtcNow
+        };
+
+        telaClienteRepository.Update(telaCliente);
+        await renovacaoTelaHistoricoRepository.AddAsync(historico, cancellationToken);
+        await renovacaoTelaHistoricoRepository.SaveChangesAsync(cancellationToken);
+
+        return OperationResult<TelaClienteDto>.Ok(MapToDto(telaCliente));
+    }
+
+    public async Task<OperationResult<TelaClienteDto>> TrocarServidorAsync(
+        Guid id,
+        TrocarServidorRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validationErrors = ValidateTrocaServidor(request);
+        if (validationErrors.Count > 0)
+        {
+            return OperationResult<TelaClienteDto>.Fail(validationErrors.ToArray());
+        }
+
+        var telaCliente = await telaClienteRepository.GetByIdAsync(id, cancellationToken);
+        if (telaCliente is null)
+        {
+            return OperationResult<TelaClienteDto>.Fail(NotFoundMessage);
+        }
+
+        var servidorNovo = await servidorRepository.GetByIdAsync(request.ServidorNovoId!.Value, cancellationToken);
+        if (servidorNovo is null)
+        {
+            return OperationResult<TelaClienteDto>.Fail("Servidor novo nao encontrado.");
+        }
+
+        var servidorAnteriorId = telaCliente.ServidorId;
+
+        telaCliente.ServidorId = request.ServidorNovoId.Value;
+
+        var historico = new RenovacaoTelaHistorico
+        {
+            Id = Guid.NewGuid(),
+            TelaClienteId = telaCliente.Id,
+            ClienteId = telaCliente.ClienteId,
+            ServidorAnteriorId = servidorAnteriorId,
+            ServidorNovoId = telaCliente.ServidorId,
+            DataVencimentoTecnicoAnterior = telaCliente.DataVencimentoTecnico,
+            NovaDataVencimentoTecnico = telaCliente.DataVencimentoTecnico,
+            ValorAcordadoAnterior = telaCliente.ValorAcordado,
+            ValorAcordadoNovo = telaCliente.ValorAcordado,
+            Observacao = NormalizeOptionalText(request.Observacao),
+            DataCriacao = DateTime.UtcNow
+        };
+
+        telaClienteRepository.Update(telaCliente);
+        await renovacaoTelaHistoricoRepository.AddAsync(historico, cancellationToken);
+        await renovacaoTelaHistoricoRepository.SaveChangesAsync(cancellationToken);
+
+        return OperationResult<TelaClienteDto>.Ok(MapToDto(telaCliente));
+    }
+
     public async Task<OperationResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var telaCliente = await telaClienteRepository.GetByIdAsync(id, cancellationToken);
@@ -197,6 +293,35 @@ public class TelaClienteService(
         if (!Enum.IsDefined(status))
         {
             errors.Add("Status deve ser valido.");
+        }
+
+        return errors;
+    }
+
+    private static List<string> ValidateRenovacao(RenovarTelaRequest request)
+    {
+        var errors = new List<string>();
+
+        if (request.NovaDataVencimentoTecnico is null || request.NovaDataVencimentoTecnico == default)
+        {
+            errors.Add("NovaDataVencimentoTecnico e obrigatoria.");
+        }
+
+        if (request.ValorAcordadoNovo is < 0)
+        {
+            errors.Add("ValorAcordadoNovo deve ser maior ou igual a zero.");
+        }
+
+        return errors;
+    }
+
+    private static List<string> ValidateTrocaServidor(TrocarServidorRequest request)
+    {
+        var errors = new List<string>();
+
+        if (request.ServidorNovoId is null || request.ServidorNovoId == Guid.Empty)
+        {
+            errors.Add("ServidorNovoId e obrigatorio.");
         }
 
         return errors;
