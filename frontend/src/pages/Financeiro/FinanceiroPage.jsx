@@ -11,6 +11,8 @@ import {
   updateLancamentoFinanceiro,
 } from '../../api/financeiroApi'
 import { getTelas } from '../../api/telasApi'
+import FeedbackAlert from '../../components/FeedbackAlert'
+import LoadingButton from '../../components/LoadingButton'
 
 const statusOptions = [
   { value: 1, label: 'Pendente', badge: 'text-bg-warning' },
@@ -110,15 +112,15 @@ function getValidationError(formData) {
   const statusFinanceiro = Number(formData.statusFinanceiro)
 
   if (!formData.clienteId) {
-    return 'ClienteId e obrigatorio.'
+    return 'Campo obrigatorio: Cliente.'
   }
 
   if (!formData.telaClienteId) {
-    return 'TelaClienteId e obrigatorio.'
+    return 'Campo obrigatorio: Tela.'
   }
 
   if (!formData.competenciaReferencia) {
-    return 'CompetenciaReferencia e obrigatoria.'
+    return 'Campo obrigatorio: Competencia.'
   }
 
   if (!Number.isFinite(valor) || valor <= 0) {
@@ -126,7 +128,7 @@ function getValidationError(formData) {
   }
 
   if (!formData.dataVencimentoFinanceiro) {
-    return 'DataVencimentoFinanceiro e obrigatoria.'
+    return 'Campo obrigatorio: Vencimento financeiro.'
   }
 
   if (!statusOptions.some((option) => option.value === statusFinanceiro)) {
@@ -337,9 +339,9 @@ function FinanceiroPage() {
       setSelectedLancamento(savedLancamento)
       setFormData(toFormData(savedLancamento))
       setMode('view')
-      setMessage(isEdit ? 'Lancamento atualizado com sucesso.' : 'Lancamento cadastrado com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -363,9 +365,9 @@ function FinanceiroPage() {
       await deleteLancamentoFinanceiro(selectedLancamento.id)
       await loadLancamentos(viewMode, filters)
       handleCreateMode()
-      setMessage('Lancamento excluido com sucesso.')
+      setMessage('Excluido com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao excluir. ${apiError.message}`)
     } finally {
       setIsDeleting(false)
     }
@@ -387,9 +389,9 @@ function FinanceiroPage() {
       setSelectedLancamento(updatedLancamento)
       setFormData(toFormData(updatedLancamento))
       setMode('view')
-      setMessage('Lancamento marcado como pago com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsMarkingPaid(false)
     }
@@ -413,8 +415,8 @@ function FinanceiroPage() {
         </div>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+      <FeedbackAlert message={message} />
+      <FeedbackAlert message={error} type="danger" />
 
       <div className="btn-group mb-3" role="group" aria-label="Visualizacao financeira">
         {viewOptions.map((option) => (
@@ -673,6 +675,7 @@ function FinanceiroPage() {
                     className="form-control"
                     id="descricao"
                     name="descricao"
+                    placeholder="Descricao do lancamento"
                     type="text"
                     value={formData.descricao}
                     onChange={handleChange}
@@ -723,6 +726,7 @@ function FinanceiroPage() {
                       className="form-control"
                       id="valor"
                       name="valor"
+                      placeholder="0,00"
                       type="number"
                       min="0.01"
                       step="0.01"
@@ -762,6 +766,7 @@ function FinanceiroPage() {
                     className="form-control"
                     id="observacao"
                     name="observacao"
+                    placeholder="Observacoes internas"
                     rows="3"
                     value={formData.observacao}
                     onChange={handleChange}
@@ -771,9 +776,9 @@ function FinanceiroPage() {
 
                 {mode !== 'view' && (
                   <div className="d-flex gap-2">
-                    <button className="btn btn-primary" type="submit" disabled={isSaving}>
-                      {isSaving ? 'Salvando...' : 'Salvar'}
-                    </button>
+                    <LoadingButton isLoading={isSaving} loadingText="Salvando..." type="submit">
+                      Salvar
+                    </LoadingButton>
                     {mode === 'edit' && (
                       <button
                         className="btn btn-outline-secondary"

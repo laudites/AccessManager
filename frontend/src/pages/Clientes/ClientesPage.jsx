@@ -6,6 +6,8 @@ import {
   getClientes,
   updateCliente,
 } from '../../api/clientesApi'
+import FeedbackAlert from '../../components/FeedbackAlert'
+import LoadingButton from '../../components/LoadingButton'
 
 const emptyForm = {
   nome: '',
@@ -45,7 +47,7 @@ function buildPayload(formData, includeAtivo) {
 
 function getValidationError(formData) {
   if (!formData.nome.trim()) {
-    return 'Nome e obrigatorio.'
+    return 'Campo obrigatorio: Nome.'
   }
 
   if (formData.diaPagamentoPreferido !== '') {
@@ -166,9 +168,9 @@ function ClientesPage() {
       setSelectedCliente(savedCliente)
       setFormData(toFormData(savedCliente))
       setMode('view')
-      setMessage(isEdit ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -192,9 +194,9 @@ function ClientesPage() {
       await deleteCliente(selectedCliente.id)
       await loadClientes()
       handleCreateMode()
-      setMessage('Cliente excluido com sucesso.')
+      setMessage('Excluido com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao excluir. ${apiError.message}`)
     } finally {
       setIsDeleting(false)
     }
@@ -217,8 +219,8 @@ function ClientesPage() {
         </div>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+      <FeedbackAlert message={message} />
+      <FeedbackAlert message={error} type="danger" />
 
       <div className="row g-3">
         <div className="col-12 col-xl-7">
@@ -320,6 +322,7 @@ function ClientesPage() {
                     className="form-control"
                     id="nome"
                     name="nome"
+                    placeholder="Nome do cliente"
                     type="text"
                     value={formData.nome}
                     onChange={handleChange}
@@ -336,6 +339,7 @@ function ClientesPage() {
                     className="form-control"
                     id="telefone"
                     name="telefone"
+                    placeholder="Telefone de contato"
                     type="text"
                     value={formData.telefone}
                     onChange={handleChange}
@@ -351,6 +355,7 @@ function ClientesPage() {
                     className="form-control"
                     id="diaPagamentoPreferido"
                     name="diaPagamentoPreferido"
+                    placeholder="1 a 31"
                     type="number"
                     min="1"
                     max="31"
@@ -368,6 +373,7 @@ function ClientesPage() {
                     className="form-control"
                     id="observacao"
                     name="observacao"
+                    placeholder="Observacoes internas"
                     rows="3"
                     value={formData.observacao}
                     onChange={handleChange}
@@ -394,9 +400,9 @@ function ClientesPage() {
 
                 {mode !== 'view' && (
                   <div className="d-flex gap-2">
-                    <button className="btn btn-primary" type="submit" disabled={isSaving}>
-                      {isSaving ? 'Salvando...' : 'Salvar'}
-                    </button>
+                    <LoadingButton isLoading={isSaving} loadingText="Salvando..." type="submit">
+                      Salvar
+                    </LoadingButton>
                     {mode === 'edit' && (
                       <button
                         className="btn btn-outline-secondary"

@@ -10,6 +10,8 @@ import {
   trocarServidor,
   updateTela,
 } from '../../api/telasApi'
+import FeedbackAlert from '../../components/FeedbackAlert'
+import LoadingButton from '../../components/LoadingButton'
 
 const statusOptions = [
   { value: 1, label: 'Ativo', badge: 'text-bg-success' },
@@ -130,23 +132,23 @@ function getValidationError(formData) {
   const status = Number(formData.status)
 
   if (!formData.clienteId) {
-    return 'ClienteId e obrigatorio.'
+    return 'Campo obrigatorio: Cliente.'
   }
 
   if (!formData.servidorId) {
-    return 'ServidorId e obrigatorio.'
+    return 'Campo obrigatorio: Servidor.'
   }
 
   if (!formData.nomeIdentificacao.trim()) {
-    return 'NomeIdentificacao e obrigatorio.'
+    return 'Campo obrigatorio: Nome identificacao.'
   }
 
   if (!formData.usuarioTela.trim()) {
-    return 'UsuarioTela e obrigatorio.'
+    return 'Campo obrigatorio: Usuario tela.'
   }
 
   if (!formData.senhaTela.trim()) {
-    return 'SenhaTela e obrigatoria.'
+    return 'Campo obrigatorio: Senha tela.'
   }
 
   if (!Number.isFinite(valorAcordado) || valorAcordado < 0) {
@@ -154,7 +156,7 @@ function getValidationError(formData) {
   }
 
   if (!formData.dataVencimentoTecnico) {
-    return 'DataVencimentoTecnico e obrigatoria.'
+    return 'Campo obrigatorio: Vencimento tecnico.'
   }
 
   if (!statusOptions.some((option) => option.value === status)) {
@@ -385,9 +387,9 @@ function TelasPage() {
       setSelectedTela(savedTela)
       setFormData(toFormData(savedTela))
       setMode('view')
-      setMessage(isEdit ? 'Tela atualizada com sucesso.' : 'Tela cadastrada com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -411,9 +413,9 @@ function TelasPage() {
       await deleteTela(selectedTela.id)
       await loadTelas(filters)
       handleCreateMode()
-      setMessage('Tela excluida com sucesso.')
+      setMessage('Excluido com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao excluir. ${apiError.message}`)
     } finally {
       setIsDeleting(false)
     }
@@ -463,9 +465,9 @@ function TelasPage() {
         observacao: renovacaoForm.observacao.trim() || null,
       })
 
-      await refreshAfterTechnicalOperation(updatedTela, 'Tela renovada com sucesso.')
+      await refreshAfterTechnicalOperation(updatedTela, 'Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsTechnicalOperationLoading(false)
     }
@@ -494,9 +496,9 @@ function TelasPage() {
         observacao: trocaServidorForm.observacao.trim() || null,
       })
 
-      await refreshAfterTechnicalOperation(updatedTela, 'Servidor da tela alterado com sucesso.')
+      await refreshAfterTechnicalOperation(updatedTela, 'Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsTechnicalOperationLoading(false)
     }
@@ -519,8 +521,8 @@ function TelasPage() {
         </div>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+      <FeedbackAlert message={message} />
+      <FeedbackAlert message={error} type="danger" />
 
       <form className="card mb-3" onSubmit={handleApplyFilters}>
         <div className="card-body">
@@ -733,9 +735,14 @@ function TelasPage() {
                   </div>
 
                   <div className="d-flex gap-2">
-                    <button className="btn btn-success" type="submit" disabled={isTechnicalOperationLoading}>
-                      {isTechnicalOperationLoading ? 'Renovando...' : 'Confirmar renovacao'}
-                    </button>
+                    <LoadingButton
+                      className="btn btn-success"
+                      isLoading={isTechnicalOperationLoading}
+                      loadingText="Renovando..."
+                      type="submit"
+                    >
+                      Confirmar renovacao
+                    </LoadingButton>
                     <button className="btn btn-outline-secondary" type="button" onClick={closeTechnicalAction}>
                       Cancelar
                     </button>
@@ -782,9 +789,14 @@ function TelasPage() {
                   </div>
 
                   <div className="d-flex gap-2">
-                    <button className="btn btn-secondary" type="submit" disabled={isTechnicalOperationLoading}>
-                      {isTechnicalOperationLoading ? 'Trocando...' : 'Confirmar troca'}
-                    </button>
+                    <LoadingButton
+                      className="btn btn-secondary"
+                      isLoading={isTechnicalOperationLoading}
+                      loadingText="Trocando..."
+                      type="submit"
+                    >
+                      Confirmar troca
+                    </LoadingButton>
                     <button className="btn btn-outline-secondary" type="button" onClick={closeTechnicalAction}>
                       Cancelar
                     </button>
@@ -847,6 +859,7 @@ function TelasPage() {
                     className="form-control"
                     id="nomeIdentificacao"
                     name="nomeIdentificacao"
+                    placeholder="Identificacao da tela"
                     type="text"
                     value={formData.nomeIdentificacao}
                     onChange={handleChange}
@@ -864,6 +877,7 @@ function TelasPage() {
                       className="form-control"
                       id="usuarioTela"
                       name="usuarioTela"
+                      placeholder="Usuario da tela"
                       type="text"
                       value={formData.usuarioTela}
                       onChange={handleChange}
@@ -880,6 +894,7 @@ function TelasPage() {
                       className="form-control"
                       id="senhaTela"
                       name="senhaTela"
+                      placeholder="Senha da tela"
                       type="text"
                       value={formData.senhaTela}
                       onChange={handleChange}
@@ -898,6 +913,7 @@ function TelasPage() {
                       className="form-control"
                       id="valorAcordado"
                       name="valorAcordado"
+                      placeholder="0,00"
                       type="number"
                       min="0"
                       step="0.01"
@@ -953,6 +969,7 @@ function TelasPage() {
                       className="form-control"
                       id="marcaTv"
                       name="marcaTv"
+                      placeholder="Marca da TV"
                       type="text"
                       value={formData.marcaTv}
                       onChange={handleChange}
@@ -969,6 +986,7 @@ function TelasPage() {
                     className="form-control"
                     id="appUtilizado"
                     name="appUtilizado"
+                    placeholder="App utilizado"
                     type="text"
                     value={formData.appUtilizado}
                     onChange={handleChange}
@@ -985,6 +1003,7 @@ function TelasPage() {
                       className="form-control"
                       id="macOuIdApp"
                       name="macOuIdApp"
+                      placeholder="MAC ou ID do app"
                       type="text"
                       value={formData.macOuIdApp}
                       onChange={handleChange}
@@ -1000,6 +1019,7 @@ function TelasPage() {
                       className="form-control"
                       id="chaveSecundaria"
                       name="chaveSecundaria"
+                      placeholder="Chave secundaria"
                       type="text"
                       value={formData.chaveSecundaria}
                       onChange={handleChange}
@@ -1016,6 +1036,7 @@ function TelasPage() {
                     className="form-control"
                     id="observacao"
                     name="observacao"
+                    placeholder="Observacoes internas"
                     rows="3"
                     value={formData.observacao}
                     onChange={handleChange}
@@ -1042,9 +1063,9 @@ function TelasPage() {
 
                 {mode !== 'view' && (
                   <div className="d-flex gap-2">
-                    <button className="btn btn-primary" type="submit" disabled={isSaving}>
-                      {isSaving ? 'Salvando...' : 'Salvar'}
-                    </button>
+                    <LoadingButton isLoading={isSaving} loadingText="Salvando..." type="submit">
+                      Salvar
+                    </LoadingButton>
                     {mode === 'edit' && (
                       <button
                         className="btn btn-outline-secondary"

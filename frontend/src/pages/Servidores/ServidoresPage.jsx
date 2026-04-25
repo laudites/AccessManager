@@ -7,6 +7,8 @@ import {
   updateServidor,
   updateServidorStatus,
 } from '../../api/servidoresApi'
+import FeedbackAlert from '../../components/FeedbackAlert'
+import LoadingButton from '../../components/LoadingButton'
 
 const statusOptions = [
   { value: 1, label: 'Ativo', badge: 'text-bg-success' },
@@ -75,7 +77,7 @@ function getValidationError(formData) {
   const status = Number(formData.status)
 
   if (!formData.nome.trim()) {
-    return 'Nome e obrigatorio.'
+    return 'Campo obrigatorio: Nome.'
   }
 
   if (!Number.isInteger(limiteClientes) || limiteClientes < 0) {
@@ -189,9 +191,9 @@ function ServidoresPage() {
       setSelectedServidor(savedServidor)
       setFormData(toFormData(savedServidor))
       setMode('view')
-      setMessage(isEdit ? 'Servidor atualizado com sucesso.' : 'Servidor cadastrado com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -215,9 +217,9 @@ function ServidoresPage() {
       await deleteServidor(selectedServidor.id)
       await loadServidores()
       handleCreateMode()
-      setMessage('Servidor excluido com sucesso.')
+      setMessage('Excluido com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao excluir. ${apiError.message}`)
     } finally {
       setIsDeleting(false)
     }
@@ -246,9 +248,9 @@ function ServidoresPage() {
       setSelectedServidor(updatedServidor)
       setFormData(toFormData(updatedServidor))
       setMode('view')
-      setMessage('Status do servidor atualizado com sucesso.')
+      setMessage('Salvo com sucesso.')
     } catch (apiError) {
-      setError(apiError.message)
+      setError(`Erro ao salvar. ${apiError.message}`)
     } finally {
       setIsUpdatingStatus(false)
     }
@@ -271,8 +273,8 @@ function ServidoresPage() {
         </div>
       </div>
 
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+      <FeedbackAlert message={message} />
+      <FeedbackAlert message={error} type="danger" />
 
       <div className="row g-3">
         <div className="col-12 col-xl-7">
@@ -396,6 +398,7 @@ function ServidoresPage() {
                     className="form-control"
                     id="nome"
                     name="nome"
+                    placeholder="Nome do servidor"
                     type="text"
                     value={formData.nome}
                     onChange={handleChange}
@@ -412,6 +415,7 @@ function ServidoresPage() {
                     className="form-control"
                     id="descricao"
                     name="descricao"
+                    placeholder="Descricao breve"
                     type="text"
                     value={formData.descricao}
                     onChange={handleChange}
@@ -448,6 +452,7 @@ function ServidoresPage() {
                       className="form-control"
                       id="limiteClientes"
                       name="limiteClientes"
+                      placeholder="0"
                       type="number"
                       min="0"
                       value={formData.limiteClientes}
@@ -466,6 +471,7 @@ function ServidoresPage() {
                       className="form-control"
                       id="usuarioPainel"
                       name="usuarioPainel"
+                      placeholder="Usuario do painel"
                       type="text"
                       value={formData.usuarioPainel}
                       onChange={handleChange}
@@ -481,6 +487,7 @@ function ServidoresPage() {
                       className="form-control"
                       id="senhaPainel"
                       name="senhaPainel"
+                      placeholder="Senha do painel"
                       type="text"
                       value={formData.senhaPainel}
                       onChange={handleChange}
@@ -497,6 +504,7 @@ function ServidoresPage() {
                     className="form-control"
                     id="observacao"
                     name="observacao"
+                    placeholder="Observacoes internas"
                     rows="3"
                     value={formData.observacao}
                     onChange={handleChange}
@@ -523,9 +531,9 @@ function ServidoresPage() {
 
                 {mode !== 'view' && (
                   <div className="d-flex gap-2">
-                    <button className="btn btn-primary" type="submit" disabled={isSaving}>
-                      {isSaving ? 'Salvando...' : 'Salvar'}
-                    </button>
+                    <LoadingButton isLoading={isSaving} loadingText="Salvando..." type="submit">
+                      Salvar
+                    </LoadingButton>
                     {mode === 'edit' && (
                       <button
                         className="btn btn-outline-secondary"

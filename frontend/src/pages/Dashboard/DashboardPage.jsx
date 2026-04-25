@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getDashboardResumo, getTelasPorServidor } from '../../api/dashboardApi'
+import FeedbackAlert from '../../components/FeedbackAlert'
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -49,7 +50,7 @@ function DashboardPage() {
     return (
       <section>
         <h1>Dashboard</h1>
-        <div className="alert alert-info mb-0">Carregando dados...</div>
+        <FeedbackAlert message="Carregando dados..." type="info" />
       </section>
     )
   }
@@ -58,7 +59,7 @@ function DashboardPage() {
     return (
       <section>
         <h1>Dashboard</h1>
-        <div className="alert alert-danger mb-0">{error}</div>
+        <FeedbackAlert message={error} type="danger" />
       </section>
     )
   }
