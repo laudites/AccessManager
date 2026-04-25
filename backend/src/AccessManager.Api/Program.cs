@@ -10,9 +10,21 @@ using AccessManager.Application.Servidores.Services;
 using AccessManager.Application.Telas.Interfaces;
 using AccessManager.Application.Telas.Services;
 
+const string DevelopmentCorsPolicy = "DevelopmentCors";
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(DevelopmentCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IServidorService, ServidorService>();
 builder.Services.AddScoped<ITelaClienteService, TelaClienteService>();
@@ -23,7 +35,15 @@ builder.Services.AddInfrastructure(
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors(DevelopmentCorsPolicy);
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.MapControllers();
 
