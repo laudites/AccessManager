@@ -1,0 +1,96 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  background: #f6f7f9;
+}
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  padding: 20px 16px;
+  background: #ffffff;
+  border-right: 1px solid #dee2e6;
+}
+
+.sidebar-brand {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.sidebar .nav-link {
+  color: #495057;
+}
+
+.sidebar .nav-link.active {
+  color: #ffffff;
+  background: #0d6efd;
+}
+
+.content-shell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.content {
+  flex: 1;
+  padding: 24px;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f7f9;
+  padding: 24px;
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.dashboard-card {
+  border-radius: 8px;
+}
+
+.dashboard-metric {
+  color: #212529;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .sidebar .nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+  }
+}
