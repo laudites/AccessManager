@@ -50,14 +50,18 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - CRUD de servidores
 - CRUD de telas
 - Filtros de telas por cliente e servidor
+- Clientes com quantidade de telas e valor agrupado das telas ativas
+- Servidores com creditos disponiveis/comprados e custo por credito
 - Renovacao tecnica manual de tela
 - Troca manual de servidor
 - Persistencia de historico para renovacao e troca de servidor
-- CRUD de lancamentos financeiros
+- Lancamentos financeiros por cliente com valor agrupado das telas ativas
+- Competencia financeira calculada automaticamente pelo backend
 - Marcacao manual de pagamento
 - Consulta de lancamentos pendentes
 - Consulta de lancamentos atrasados
-- Dashboard com resumo e telas por servidor
+- Endpoint/manual service para gerar pendentes 5 dias antes do vencimento acordado
+- Dashboard com resumo financeiro, rendimento mensal, custo mensal, creditos e telas por servidor
 - Testes unitarios de regras centrais e smoke tests de arquitetura
 
 ### Frontend
@@ -73,9 +77,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 
 ---
 
-## Proximas melhorias planejadas
-
-As proximas melhorias abaixo ainda nao estao implementadas. Elas devem evoluir o MVP sem perder o historico das regras atuais.
+## Estado atual das melhorias recentes
 
 ### Clientes
 
@@ -110,6 +112,13 @@ As proximas melhorias abaixo ainda nao estao implementadas. Elas devem evoluir o
 
 ---
 
+## Proximas melhorias planejadas
+
+- Criar job/background service real para gerar pendencias automaticamente 5 dias antes do vencimento.
+- Expor visualizacao completa e filtravel do historico tecnico.
+
+---
+
 ## Endpoints principais
 
 - `api/clientes`
@@ -121,6 +130,7 @@ As proximas melhorias abaixo ainda nao estao implementadas. Elas devem evoluir o
 - `api/lancamentos-financeiros/{id}/marcar-pago`
 - `api/lancamentos-financeiros/pendentes`
 - `api/lancamentos-financeiros/atrasados`
+- `api/lancamentos-financeiros/gerar-pendentes`
 - `api/dashboard/resumo`
 - `api/dashboard/telas-por-servidor`
 

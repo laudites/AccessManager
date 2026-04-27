@@ -4,7 +4,7 @@ Sistema interno para gestao de clientes, telas de acesso, servidores, renovacoes
 
 ## Estado atual
 
-A Fase 1 (MVP) esta concluida. O sistema possui backend .NET 8 com Entity Framework Core e MySQL, frontend React com Vite, CRUDs principais, dashboard, operacoes tecnicas manuais e financeiro separado do tecnico.
+A Fase 1 (MVP) esta concluida. O sistema possui backend .NET 8 com Entity Framework Core e MySQL, frontend React com Vite, CRUDs principais, dashboard, operacoes tecnicas manuais, financeiro por cliente e controle de custos por creditos de servidor.
 
 ## Conceito principal
 
@@ -70,8 +70,10 @@ Antes de rodar a API, ajuste usuario e senha conforme o MySQL local.
 Aplicar migrations a partir da raiz do repositorio:
 
 ```powershell
-dotnet ef database update --project backend/src/AccessManager.Infrastructure --startup-project backend/src/AccessManager.Api
+dotnet ef database update --project backend/src/AccessManager.Infrastructure/AccessManager.Infrastructure.csproj --startup-project backend/src/AccessManager.Api/AccessManager.Api.csproj --context AccessManagerDbContext
 ```
+
+Sempre que houver mudanca no modelo de dados ou nova migration, execute `database update` antes de rodar a API. A migration `ServerCreditsAndClientFinance` atualiza servidores para creditos/custo por credito e ajusta lancamentos financeiros para o modelo por cliente.
 
 ## Executar backend
 
@@ -143,46 +145,17 @@ npm run build
 - Marcacao manual de pagamento
 - Listagem de pendentes e atrasados
 - Dashboard com totais de clientes, telas, vencimentos e valores em aberto
+- Clientes exibem quantidade de telas e valor agrupado das telas ativas
+- Servidores usam quantidade de creditos e valor de custo por credito
+- Financeiro cria lancamentos por cliente, agrupando valores das telas ativas
+- Competencia financeira e calculada automaticamente pelo backend
+- Geracao manual de lancamentos pendentes preparada para a regra de 5 dias antes do vencimento
+- Dashboard com rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor e pendencias financeiras
 
 ## Proximas melhorias planejadas
 
-As regras abaixo ainda nao estao implementadas no codigo. Elas orientam a proxima etapa de desenvolvimento e devem ser tratadas com ajustes de dominio, DTOs, banco, API e frontend.
-
-### Clientes
-
-- A listagem e o detalhe de clientes devem exibir a quantidade de telas do cliente.
-- A listagem e o detalhe de clientes devem exibir o valor total agrupado das telas do cliente.
-- O valor agrupado deve ser calculado pela soma dos valores acordados das telas ativas do cliente.
-
-### Servidores
-
-- Remover o conceito de limite de clientes.
-- Substituir por quantidade de creditos disponiveis/comprados no servidor.
-- Adicionar valor de custo de cada credito do servidor.
-- Permitir calculo de custo mensal com base nos creditos utilizados ou cadastrados.
-
-### Financeiro
-
-- O lancamento financeiro deve passar a ser feito por cliente.
-- O valor do lancamento deve agrupar o valor das telas ativas do cliente.
-- Se o cliente possui duas ou mais telas, o lancamento financeiro deve considerar a soma dessas telas.
-- `CompetenciaReferencia` nao deve ser preenchida manualmente pelo usuario.
-- `CompetenciaReferencia` pode ser mantida internamente para relatorios mensais, calculada automaticamente a partir de `DataVencimentoFinanceiro`.
-- `DataVencimentoFinanceiro` representa a data acordada com o cliente para pagamento.
-- O sistema deve gerar automaticamente lancamento financeiro pendente 5 dias antes do vencimento financeiro acordado.
-- Pagamento continua manual.
-- Pagamento nao renova tela.
-- Financeiro continua separado do tecnico.
-
-### Dashboard
-
-- Exibir rendimento mensal.
-- Exibir custo mensal.
-- Exibir quantidade de clientes.
-- Exibir quantidade de clientes que ja pagaram no mes.
-- Exibir quantidade de creditos de cada servidor.
-- Exibir quantidade de clientes/telas em cada servidor.
-- Exibir lista de clientes/pessoas pendentes no financeiro.
+- Criar job/background service real para gerar pendencias automaticamente 5 dias antes do vencimento.
+- Expor consulta completa do historico tecnico.
 
 ## Fora do escopo atual
 

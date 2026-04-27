@@ -9,13 +9,10 @@
 - nome e obrigatorio
 - dia de pagamento preferido, quando informado, deve estar entre 1 e 31
 - cliente pode ser marcado como ativo/inativo
-
-### Proximas melhorias planejadas
-
 - A listagem e o detalhe de clientes devem exibir quantidade de telas do cliente.
 - A listagem e o detalhe de clientes devem exibir valor total agrupado das telas do cliente.
 - Valor total agrupado = soma de `ValorAcordado` das telas ativas do cliente.
-- Telas inativas, canceladas ou tecnicamente removidas nao devem compor o valor agrupado, salvo se uma regra futura definir diferente.
+- Telas inativas nao compoem o valor agrupado.
 
 ---
 
@@ -52,19 +49,13 @@ Regras implementadas:
 - possui credenciais proprias
 - pode atender varias telas
 - possui status proprio
-- limite de clientes nao pode ser negativo
-
-### Estado atual
-
-- O MVP ainda possui `LimiteClientes`.
-
-### Proximas melhorias planejadas
-
-- Remover o conceito de limite de clientes.
-- Substituir por quantidade de creditos disponiveis/comprados no servidor.
-- Adicionar valor de custo de cada credito do servidor.
+- possui quantidade de creditos disponiveis/comprados
+- possui valor de custo por credito
+- quantidade de creditos nao pode ser negativa
+- valor de custo por credito nao pode ser negativo
+- `LimiteClientes` nao e mais regra funcional
 - O custo mensal do servidor deve poder ser calculado com base nos creditos utilizados ou cadastrados.
-- Creditos utilizados podem ser derivados da quantidade de telas/clientes associados ao servidor, conforme regra definida na implementacao.
+- No dashboard atual, custo estimado por servidor usa a quantidade de telas ativas multiplicada pelo custo do credito.
 
 ---
 
@@ -114,35 +105,21 @@ Regras implementadas:
 
 Regras implementadas:
 
-- lancamento pertence a um cliente e a uma tela
-- tela informada deve pertencer ao cliente informado
-- competencia de referencia e obrigatoria
-- valor deve ser maior que zero
+- lancamento financeiro pertence a um cliente
+- `TelaClienteId` e opcional
+- valor do lancamento e calculado pela soma dos valores acordados das telas ativas do cliente
+- `CompetenciaReferencia` e calculada automaticamente pelo backend com base em `DataVencimentoFinanceiro`
 - vencimento financeiro e obrigatorio
 - status financeiro deve ser valido
 - ao criar lancamento sem status, o status padrao e `Pendente`
 - ao marcar como pago, status vira `Pago` e `DataPagamento` recebe a data atual em UTC
 - pagamento nao altera `DataVencimentoTecnico` da tela
 
-### Estado atual
+### Geracao de pendentes
 
-- O MVP registra lancamento financeiro associado a cliente e tela.
-- `CompetenciaReferencia` e informada no DTO atual.
-- Criacao de lancamentos ainda e manual.
-
-### Proximas melhorias planejadas
-
-- O lancamento financeiro deve ser feito por cliente.
-- O valor do lancamento deve agrupar o valor das telas ativas do cliente.
-- Se o cliente possui duas ou mais telas, o lancamento deve considerar a soma dos valores acordados dessas telas.
-- `CompetenciaReferencia` nao deve ser preenchida manualmente pelo usuario.
-- `CompetenciaReferencia` pode ser mantida internamente para relatorios mensais.
-- Quando mantida internamente, `CompetenciaReferencia` deve ser calculada automaticamente com base em `DataVencimentoFinanceiro`.
-- `DataVencimentoFinanceiro` representa a data acordada com o cliente para pagamento.
-- O sistema deve gerar automaticamente um lancamento financeiro pendente 5 dias antes do vencimento financeiro acordado.
-- Pagamento continua manual.
-- Pagamento nao renova tela.
-- Financeiro continua separado do tecnico.
+- Existe endpoint/manual service para gerar lancamentos pendentes de clientes elegiveis 5 dias antes do vencimento acordado.
+- Ainda nao existe job/background service agendado.
+- A geracao evita duplicar lancamento para o mesmo cliente e vencimento.
 
 ---
 
@@ -153,16 +130,13 @@ Regras implementadas:
 - Exibe resumo operacional e financeiro do MVP.
 - Classifica telas por vencimento tecnico.
 - Resume lancamentos pendentes, atrasados e total em aberto.
-
-### Proximas melhorias planejadas
-
-- Exibir rendimento mensal.
-- Exibir custo mensal.
-- Exibir quantidade de clientes.
-- Exibir quantidade de clientes que ja pagaram no mes.
-- Exibir quantidade de creditos de cada servidor.
-- Exibir quantidade de clientes/telas em cada servidor.
-- Exibir lista de clientes/pessoas pendentes no financeiro.
+- Exibe rendimento mensal.
+- Exibe custo mensal.
+- Exibe quantidade de clientes.
+- Exibe quantidade de clientes que ja pagaram no mes.
+- Exibe quantidade de creditos de cada servidor.
+- Exibe quantidade de clientes/telas em cada servidor.
+- Exibe lista de clientes/pessoas pendentes no financeiro.
 
 ---
 

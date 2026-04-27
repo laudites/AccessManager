@@ -21,10 +21,8 @@ Observacoes praticas:
 - Cliente pode existir sem lancamento financeiro.
 - Cliente pode ter varias telas.
 
-Proximas melhorias planejadas:
-
-- DTOs de listagem/detalhe de cliente devem incluir quantidade de telas.
-- DTOs de listagem/detalhe de cliente devem incluir valor total agrupado das telas ativas.
+- DTOs de listagem/detalhe de cliente incluem quantidade de telas.
+- DTOs de listagem/detalhe de cliente incluem valor total agrupado das telas ativas.
 - Esses campos podem ser calculados por consulta/projecao e nao precisam necessariamente ser persistidos na tabela `Cliente`.
 
 ---
@@ -35,7 +33,8 @@ Proximas melhorias planejadas:
 - Nome (string)
 - Descricao (string?)
 - Status (enum)
-- LimiteClientes (int)
+- QuantidadeCreditos (int)
+- ValorCustoCredito (decimal)
 - UsuarioPainel (string)
 - SenhaPainel (string)
 - Observacao (string?)
@@ -43,17 +42,12 @@ Proximas melhorias planejadas:
 
 Observacoes praticas:
 
-- `LimiteClientes` nao pode ser negativo.
+- `QuantidadeCreditos` nao pode ser negativo.
+- `ValorCustoCredito` nao pode ser negativo.
+- `LimiteClientes` foi substituido por `QuantidadeCreditos` na migration `ServerCreditsAndClientFinance` e nao e mais regra funcional.
 - O status do servidor e independente do status das telas.
 - A troca de servidor de uma tela nao altera automaticamente dados financeiros.
-
-Proximas melhorias planejadas:
-
-- `LimiteClientes` deve ser removido do modelo de dominio e substituido em migration futura.
-- Adicionar campo para quantidade de creditos disponiveis/comprados no servidor.
-- Adicionar campo para valor de custo por credito.
-- O custo mensal pode ser calculado como `creditos utilizados * custo por credito` ou por outra regra definida antes da implementacao.
-- Avaliar se creditos utilizados serao persistidos ou calculados pela quantidade de telas/clientes associados ao servidor.
+- O custo mensal estimado pode ser calculado com base nos creditos utilizados/cadastrados.
 
 ---
 
@@ -114,7 +108,7 @@ Observacoes praticas:
 
 - Id (Guid)
 - ClienteId (Guid)
-- TelaClienteId (Guid)
+- TelaClienteId (Guid?)
 - CompetenciaReferencia (DateTime)
 - Descricao (string)
 - Valor (decimal)
@@ -126,36 +120,26 @@ Observacoes praticas:
 
 Observacoes praticas:
 
-- Lancamento sempre referencia cliente e tela.
-- A tela deve pertencer ao cliente informado.
-- `Valor` deve ser maior que zero.
+- Lancamento sempre referencia cliente.
+- `TelaClienteId` e opcional para manter compatibilidade historica, mas o fluxo principal atual e por cliente.
+- `Valor` e calculado pelo backend pela soma das telas ativas do cliente.
 - `StatusFinanceiro` padrao na criacao e `Pendente` quando nao informado.
+- `CompetenciaReferencia` e calculada automaticamente a partir de `DataVencimentoFinanceiro`.
 - Marcar como pago define `StatusFinanceiro = Pago` e preenche `DataPagamento`.
 - Pagamento nao altera a tela, nao renova vencimento tecnico e nao cria historico tecnico.
-
-Proximas melhorias planejadas:
-
-- Lancamento financeiro deve passar a representar cobranca por cliente.
-- Avaliar tornar `TelaClienteId` opcional, remover do fluxo principal ou substituir por relacionamento de detalhe caso seja necessario auditar quais telas compuseram o valor.
-- `Valor` deve ser calculado pela soma dos valores acordados das telas ativas do cliente.
-- `CompetenciaReferencia` nao deve ser preenchida manualmente pelo usuario.
-- `CompetenciaReferencia` pode permanecer no banco como campo interno para relatorios mensais.
-- Quando mantida, `CompetenciaReferencia` deve ser calculada automaticamente a partir de `DataVencimentoFinanceiro`.
-- `DataVencimentoFinanceiro` deve representar a data acordada com o cliente.
-- Criar mecanismo para gerar lancamento pendente automaticamente 5 dias antes do vencimento financeiro acordado.
+- `DataVencimentoFinanceiro` representa a data acordada com o cliente.
+- Existe mecanismo manual/endpoint para gerar lancamento pendente 5 dias antes do vencimento financeiro acordado.
 
 ---
 
 ## Dashboard e consultas agregadas
 
-Proximas melhorias planejadas:
-
-- Criar consultas agregadas para rendimento mensal.
-- Criar consultas agregadas para custo mensal baseado em creditos de servidores.
-- Criar consultas para clientes que pagaram no mes.
-- Criar consultas para creditos por servidor.
-- Criar consultas para clientes/telas por servidor.
-- Criar consulta para clientes pendentes no financeiro.
+- Existem consultas agregadas para rendimento mensal.
+- Existem consultas agregadas para custo mensal baseado em creditos de servidores.
+- Existem consultas para clientes que pagaram no mes.
+- Existem consultas para creditos por servidor.
+- Existem consultas para clientes/telas por servidor.
+- Existe consulta para clientes pendentes no financeiro.
 
 ---
 
@@ -169,13 +153,14 @@ Proximas melhorias planejadas:
   - `RenovacoesTelasHistorico`
   - `LancamentosFinanceiros`
 - Migration inicial existente: `20260424191340_InitialCreate`
+- Migration de creditos/financeiro por cliente: `20260427211202_ServerCreditsAndClientFinance`
 
 Observacao:
 
-- As novas regras planejadas exigem migration futura, mas nenhuma migration deve ser criada nesta etapa de documentacao.
+- Mudancas no modelo de dados exigem nova migration e execucao de `database update`.
 
 Comando pratico para aplicar migrations:
 
 ```powershell
-dotnet ef database update --project backend/src/AccessManager.Infrastructure --startup-project backend/src/AccessManager.Api
+dotnet ef database update --project backend/src/AccessManager.Infrastructure/AccessManager.Infrastructure.csproj --startup-project backend/src/AccessManager.Api/AccessManager.Api.csproj --context AccessManagerDbContext
 ```

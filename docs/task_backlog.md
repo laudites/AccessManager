@@ -6,43 +6,45 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 
 ## Prioridade alta
 
-### Regras planejadas para Clientes
+### Implementado: Clientes
 
-- Incluir quantidade de telas na listagem e no detalhe de clientes.
-- Incluir valor total agrupado das telas ativas do cliente.
-- Calcular o valor agrupado pela soma de `ValorAcordado` das telas ativas.
-- Atualizar DTOs, services, repositories, endpoints e tela de Clientes.
-- Adicionar testes para cliente com uma tela, varias telas e nenhuma tela ativa.
+- Quantidade de telas na listagem e no detalhe de clientes.
+- Valor total agrupado das telas ativas do cliente.
+- Calculo pela soma de `ValorAcordado` das telas ativas.
+- DTOs, services, repositories, endpoints, frontend e testes atualizados.
 
-### Regras planejadas para Servidores
+### Implementado: Servidores
 
-- Remover `LimiteClientes` do dominio, DTOs, validacoes e UI.
-- Criar campos de creditos disponiveis/comprados e custo por credito.
-- Definir regra exata de creditos utilizados: por tela, por cliente, ou por cadastro manual.
-- Implementar calculo de custo mensal do servidor.
-- Criar migration para substituir o modelo atual de limite por creditos.
+- `LimiteClientes` deixou de ser regra funcional.
+- Campos de creditos disponiveis/comprados e custo por credito implementados.
+- Calculo de custo mensal estimado do servidor implementado no dashboard.
+- Migration `ServerCreditsAndClientFinance` criada e aplicada no banco local.
 
-### Regras planejadas para Financeiro
+### Implementado: Financeiro
 
-- Alterar lancamento financeiro para ser criado por cliente.
-- Agrupar automaticamente o valor das telas ativas do cliente no lancamento.
-- Remover preenchimento manual de `CompetenciaReferencia` pelo usuario.
-- Calcular `CompetenciaReferencia` automaticamente a partir de `DataVencimentoFinanceiro`.
-- Usar `DataVencimentoFinanceiro` como data acordada com o cliente.
-- Gerar lancamento financeiro pendente automaticamente 5 dias antes do vencimento acordado.
-- Manter pagamento manual.
-- Garantir que pagamento nao renove tela.
-- Garantir que financeiro continue separado do tecnico.
+- Lancamento financeiro por cliente.
+- Valor agrupado automaticamente pelas telas ativas do cliente.
+- `CompetenciaReferencia` calculada automaticamente pelo backend a partir de `DataVencimentoFinanceiro`.
+- `DataVencimentoFinanceiro` usada como data acordada com o cliente.
+- Endpoint/manual service para gerar lancamento pendente 5 dias antes do vencimento acordado.
+- Pagamento manual mantido.
+- Pagamento nao renova tela.
+- Financeiro continua separado do tecnico.
 
-### Regras planejadas para Dashboard
+### Implementado: Dashboard financeiro
 
-- Exibir rendimento mensal.
-- Exibir custo mensal.
-- Exibir quantidade de clientes.
-- Exibir quantidade de clientes que ja pagaram no mes.
-- Exibir creditos por servidor.
-- Exibir quantidade de clientes/telas em cada servidor.
-- Exibir lista de clientes/pessoas pendentes no financeiro.
+- Rendimento mensal.
+- Custo mensal.
+- Quantidade de clientes.
+- Quantidade de clientes que ja pagaram no mes.
+- Creditos por servidor.
+- Quantidade de clientes/telas em cada servidor.
+- Lista de clientes/pessoas pendentes no financeiro.
+
+### Futuro: geracao automatica real
+
+- Criar job/background service real para gerar pendencias 5 dias antes do vencimento acordado.
+- Manter endpoint/manual service atual como base para futuro scheduler.
 
 ### Historico tecnico
 

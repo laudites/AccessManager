@@ -26,14 +26,12 @@ GET /api/clientes/{id}
 
 ---
 
-## Proximas melhorias planejadas
+## Contratos atuais
 
-As proximas mudancas de API ainda nao estao implementadas.
-
-- Endpoints de clientes devem retornar agregados de quantidade de telas e valor total das telas ativas quando fizer sentido para listagem/detalhe.
-- Endpoints de servidores devem substituir limite de clientes por creditos disponiveis/comprados e custo por credito.
-- Endpoints financeiros devem expor criacao/consulta por cliente, com valor agrupado das telas ativas.
-- `CompetenciaReferencia` nao deve ser campo de entrada do usuario nos DTOs publicos.
+- Endpoints de clientes retornam agregados de quantidade de telas e valor total das telas ativas.
+- Endpoints de servidores usam creditos disponiveis/comprados e custo por credito.
+- Endpoints financeiros expoem criacao/consulta por cliente, com valor agrupado das telas ativas.
+- `CompetenciaReferencia` nao e campo de entrada do usuario nos DTOs publicos.
 - `DataVencimentoFinanceiro` deve ser campo de entrada para representar a data acordada de pagamento.
-- A geracao automatica de lancamento pendente 5 dias antes do vencimento deve ter caso de uso proprio e endpoints administrativos apenas se necessario.
-- Dashboard deve expor dados agregados para rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor, clientes/telas por servidor e pendencias financeiras por cliente.
+- A geracao de lancamento pendente 5 dias antes do vencimento possui endpoint manual em `POST /api/lancamentos-financeiros/gerar-pendentes`.
+- Dashboard expoe dados agregados para rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor, clientes/telas por servidor e pendencias financeiras por cliente.

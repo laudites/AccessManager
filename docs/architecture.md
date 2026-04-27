@@ -46,13 +46,13 @@
 
 ---
 
-## Proximas melhorias planejadas
+## Regras implementadas recentes
 
-As regras abaixo ainda nao estao implementadas e devem respeitar a Clean Architecture existente.
+As regras abaixo estao implementadas e devem continuar respeitando a Clean Architecture existente.
 
 - Agregacoes de clientes, como quantidade de telas e valor total agrupado, devem ser calculadas na Application a partir de consultas da Infrastructure.
 - Regras de financeiro por cliente devem ficar na Application/Domain, nao nos controllers.
-- Geracao automatica de lancamentos 5 dias antes do vencimento deve ser modelada como caso de uso explicito. Se houver job/agendador no futuro, ele deve apenas acionar caso de uso da Application.
+- Geracao de lancamentos pendentes 5 dias antes do vencimento existe como caso de uso/endpoint manual. Se houver job/agendador no futuro, ele deve apenas acionar caso de uso da Application.
 - Calculo de custo mensal por creditos de servidor deve ficar fora do controller e deve ter DTOs proprios.
-- Mudancas de modelo, como remocao de `LimiteClientes` e adicao de creditos/custo por credito, exigem migration futura.
+- Mudancas de modelo, como remocao de `LimiteClientes` e adicao de creditos/custo por credito, foram registradas na migration `ServerCreditsAndClientFinance`.
 - Pagamento manual deve continuar isolado da renovacao tecnica.
