@@ -118,7 +118,11 @@ public class ClienteService(IClienteRepository clienteRepository) : IClienteServ
             Observacao = cliente.Observacao,
             DiaPagamentoPreferido = cliente.DiaPagamentoPreferido,
             DataCadastro = cliente.DataCadastro,
-            Ativo = cliente.Ativo
+            Ativo = cliente.Ativo,
+            QuantidadeTelas = cliente.Telas.Count(tela => tela.Ativo),
+            ValorTotalTelas = cliente.Telas
+                .Where(tela => tela.Ativo)
+                .Sum(tela => tela.ValorAcordado)
         };
     }
 

@@ -65,6 +65,7 @@ public class TelaClienteConfiguration : IEntityTypeConfiguration<TelaCliente>
         builder.HasMany(tela => tela.LancamentosFinanceiros)
             .WithOne(lancamento => lancamento.TelaCliente)
             .HasForeignKey(lancamento => lancamento.TelaClienteId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
     }
 }

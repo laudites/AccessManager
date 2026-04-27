@@ -13,7 +13,10 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
         StatusFinanceiro? statusFinanceiro,
         CancellationToken cancellationToken)
     {
-        var query = dbContext.LancamentosFinanceiros.AsNoTracking();
+        IQueryable<LancamentoFinanceiro> query = dbContext.LancamentosFinanceiros
+            .AsNoTracking()
+            .Include(lancamento => lancamento.Cliente)
+            .Include(lancamento => lancamento.TelaCliente);
 
         if (clienteId is not null)
         {
@@ -39,6 +42,8 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
     {
         return await dbContext.LancamentosFinanceiros
             .AsNoTracking()
+            .Include(lancamento => lancamento.Cliente)
+            .Include(lancamento => lancamento.TelaCliente)
             .Where(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pendente)
             .OrderBy(lancamento => lancamento.DataVencimentoFinanceiro)
             .ToListAsync(cancellationToken);
@@ -50,6 +55,8 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
     {
         return await dbContext.LancamentosFinanceiros
             .AsNoTracking()
+            .Include(lancamento => lancamento.Cliente)
+            .Include(lancamento => lancamento.TelaCliente)
             .Where(lancamento =>
                 lancamento.StatusFinanceiro == StatusFinanceiro.Atrasado ||
                 (lancamento.StatusFinanceiro == StatusFinanceiro.Pendente &&
@@ -61,7 +68,21 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
     public async Task<LancamentoFinanceiro?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await dbContext.LancamentosFinanceiros
+            .Include(lancamento => lancamento.Cliente)
+            .Include(lancamento => lancamento.TelaCliente)
             .FirstOrDefaultAsync(lancamento => lancamento.Id == id, cancellationToken);
+    }
+
+    public async Task<bool> ExistsByClienteAndVencimentoAsync(
+        Guid clienteId,
+        DateTime dataVencimentoFinanceiro,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.LancamentosFinanceiros.AnyAsync(
+            lancamento => lancamento.ClienteId == clienteId &&
+                lancamento.DataVencimentoFinanceiro.Date == dataVencimentoFinanceiro.Date &&
+                lancamento.StatusFinanceiro != StatusFinanceiro.Cancelado,
+            cancellationToken);
     }
 
     public async Task AddAsync(LancamentoFinanceiro lancamentoFinanceiro, CancellationToken cancellationToken)

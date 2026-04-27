@@ -21,29 +21,40 @@ public class DashboardRepository(AccessManagerDbContext dbContext) : IDashboardR
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Servidor>> GetServidoresAsync(CancellationToken cancellationToken)
+    {
+        return await dbContext.Servidores
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<LancamentoFinanceiro>> GetLancamentosFinanceirosAsync(
         CancellationToken cancellationToken)
     {
         return await dbContext.LancamentosFinanceiros
             .AsNoTracking()
+            .Include(lancamento => lancamento.Cliente)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<TelasPorServidorDto>> GetTelasPorServidorAsync(
         CancellationToken cancellationToken)
     {
-        return await dbContext.TelasClientes
+        return await dbContext.Servidores
             .AsNoTracking()
-            .GroupBy(tela => new
+            .Select(servidor => new TelasPorServidorDto
             {
-                tela.ServidorId,
-                NomeServidor = tela.Servidor == null ? string.Empty : tela.Servidor.Nome
-            })
-            .Select(grupo => new TelasPorServidorDto
-            {
-                ServidorId = grupo.Key.ServidorId,
-                NomeServidor = grupo.Key.NomeServidor,
-                QuantidadeTelas = grupo.Count()
+                ServidorId = servidor.Id,
+                NomeServidor = servidor.Nome,
+                QuantidadeCreditos = servidor.QuantidadeCreditos,
+                ValorCustoCredito = servidor.ValorCustoCredito,
+                QuantidadeClientes = servidor.Telas
+                    .Where(tela => tela.Ativo)
+                    .Select(tela => tela.ClienteId)
+                    .Distinct()
+                    .Count(),
+                QuantidadeTelas = servidor.Telas.Count(tela => tela.Ativo),
+                CustoEstimado = servidor.Telas.Count(tela => tela.Ativo) * servidor.ValorCustoCredito
             })
             .OrderBy(item => item.NomeServidor)
             .ToListAsync(cancellationToken);

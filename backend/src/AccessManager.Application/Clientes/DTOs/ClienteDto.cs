@@ -9,4 +9,6 @@ public class ClienteDto
     public int? DiaPagamentoPreferido { get; set; }
     public DateTime DataCadastro { get; set; }
     public bool Ativo { get; set; }
+    public int QuantidadeTelas { get; set; }
+    public decimal ValorTotalTelas { get; set; }
 }

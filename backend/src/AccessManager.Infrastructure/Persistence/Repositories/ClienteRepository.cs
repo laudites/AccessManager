@@ -10,6 +10,7 @@ public class ClienteRepository(AccessManagerDbContext dbContext) : IClienteRepos
     {
         return await dbContext.Clientes
             .AsNoTracking()
+            .Include(cliente => cliente.Telas)
             .OrderBy(cliente => cliente.Nome)
             .ToListAsync(cancellationToken);
     }
@@ -17,6 +18,7 @@ public class ClienteRepository(AccessManagerDbContext dbContext) : IClienteRepos
     public async Task<Cliente?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await dbContext.Clientes
+            .Include(cliente => cliente.Telas)
             .FirstOrDefaultAsync(cliente => cliente.Id == id, cancellationToken);
     }
 

@@ -22,7 +22,11 @@ public class ServidorConfiguration : IEntityTypeConfiguration<Servidor>
         builder.Property(servidor => servidor.Status)
             .IsRequired();
 
-        builder.Property(servidor => servidor.LimiteClientes)
+        builder.Property(servidor => servidor.QuantidadeCreditos)
+            .IsRequired();
+
+        builder.Property(servidor => servidor.ValorCustoCredito)
+            .HasPrecision(10, 2)
             .IsRequired();
 
         builder.Property(servidor => servidor.UsuarioPainel)

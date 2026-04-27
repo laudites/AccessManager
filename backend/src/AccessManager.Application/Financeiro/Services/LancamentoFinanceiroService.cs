@@ -2,7 +2,6 @@ using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Common;
 using AccessManager.Application.Financeiro.DTOs;
 using AccessManager.Application.Financeiro.Interfaces;
-using AccessManager.Application.Telas.Interfaces;
 using AccessManager.Domain.Entities;
 using AccessManager.Domain.Enums;
 
@@ -10,8 +9,7 @@ namespace AccessManager.Application.Financeiro.Services;
 
 public class LancamentoFinanceiroService(
     ILancamentoFinanceiroRepository lancamentoFinanceiroRepository,
-    IClienteRepository clienteRepository,
-    ITelaClienteRepository telaClienteRepository) : ILancamentoFinanceiroService
+    IClienteRepository clienteRepository) : ILancamentoFinanceiroService
 {
     private const string NotFoundMessage = "Lancamento financeiro nao encontrado.";
 
@@ -19,31 +17,33 @@ public class LancamentoFinanceiroService(
         CreateLancamentoFinanceiroDto dto,
         CancellationToken cancellationToken)
     {
-        var validationErrors = Validate(
-            dto.ClienteId,
-            dto.TelaClienteId,
-            dto.CompetenciaReferencia,
-            dto.Valor,
-            dto.DataVencimentoFinanceiro,
-            dto.StatusFinanceiro);
-
-        await ValidateRelationsAsync(dto.ClienteId, dto.TelaClienteId, validationErrors, cancellationToken);
+        var validationErrors = Validate(dto.ClienteId, dto.DataVencimentoFinanceiro, dto.StatusFinanceiro);
+        var cliente = await ValidateClienteAsync(dto.ClienteId, validationErrors, cancellationToken);
 
         if (validationErrors.Count > 0)
         {
             return OperationResult<LancamentoFinanceiroDto>.Fail(validationErrors.ToArray());
         }
 
+        var valorAgrupado = CalculateValorTelasAtivas(cliente!);
+        if (valorAgrupado <= 0)
+        {
+            return OperationResult<LancamentoFinanceiroDto>.Fail("Cliente nao possui telas ativas com valor acordado.");
+        }
+
+        var dataVencimentoFinanceiro = dto.DataVencimentoFinanceiro!.Value.Date;
         var statusFinanceiro = dto.StatusFinanceiro ?? StatusFinanceiro.Pendente;
         var lancamento = new LancamentoFinanceiro
         {
             Id = Guid.NewGuid(),
             ClienteId = dto.ClienteId!.Value,
-            TelaClienteId = dto.TelaClienteId!.Value,
-            CompetenciaReferencia = dto.CompetenciaReferencia!.Value,
-            Descricao = dto.Descricao.Trim(),
-            Valor = dto.Valor,
-            DataVencimentoFinanceiro = dto.DataVencimentoFinanceiro!.Value,
+            TelaClienteId = null,
+            CompetenciaReferencia = CalculateCompetenciaReferencia(dataVencimentoFinanceiro),
+            Descricao = string.IsNullOrWhiteSpace(dto.Descricao)
+                ? $"Mensalidade {cliente!.Nome}"
+                : dto.Descricao.Trim(),
+            Valor = valorAgrupado,
+            DataVencimentoFinanceiro = dataVencimentoFinanceiro,
             DataPagamento = statusFinanceiro == StatusFinanceiro.Pago
                 ? dto.DataPagamento ?? DateTime.UtcNow
                 : dto.DataPagamento,
@@ -55,7 +55,7 @@ public class LancamentoFinanceiroService(
         await lancamentoFinanceiroRepository.AddAsync(lancamento, cancellationToken);
         await lancamentoFinanceiroRepository.SaveChangesAsync(cancellationToken);
 
-        return OperationResult<LancamentoFinanceiroDto>.Ok(MapToDto(lancamento));
+        return OperationResult<LancamentoFinanceiroDto>.Ok(MapToDto(lancamento, cliente));
     }
 
     public async Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GetAllAsync(
@@ -94,15 +94,8 @@ public class LancamentoFinanceiroService(
         UpdateLancamentoFinanceiroDto dto,
         CancellationToken cancellationToken)
     {
-        var validationErrors = Validate(
-            dto.ClienteId,
-            dto.TelaClienteId,
-            dto.CompetenciaReferencia,
-            dto.Valor,
-            dto.DataVencimentoFinanceiro,
-            dto.StatusFinanceiro);
-
-        await ValidateRelationsAsync(dto.ClienteId, dto.TelaClienteId, validationErrors, cancellationToken);
+        var validationErrors = Validate(dto.ClienteId, dto.DataVencimentoFinanceiro, dto.StatusFinanceiro);
+        var cliente = await ValidateClienteAsync(dto.ClienteId, validationErrors, cancellationToken);
 
         if (validationErrors.Count > 0)
         {
@@ -115,13 +108,24 @@ public class LancamentoFinanceiroService(
             return OperationResult<LancamentoFinanceiroDto>.Fail(NotFoundMessage);
         }
 
+        var valorAgrupado = CalculateValorTelasAtivas(cliente!);
+        if (valorAgrupado <= 0)
+        {
+            return OperationResult<LancamentoFinanceiroDto>.Fail("Cliente nao possui telas ativas com valor acordado.");
+        }
+
+        var dataVencimentoFinanceiro = dto.DataVencimentoFinanceiro!.Value.Date;
+        var statusFinanceiro = dto.StatusFinanceiro ?? lancamento.StatusFinanceiro;
+
         lancamento.ClienteId = dto.ClienteId!.Value;
-        lancamento.TelaClienteId = dto.TelaClienteId!.Value;
-        lancamento.CompetenciaReferencia = dto.CompetenciaReferencia!.Value;
-        lancamento.Descricao = dto.Descricao.Trim();
-        lancamento.Valor = dto.Valor;
-        lancamento.DataVencimentoFinanceiro = dto.DataVencimentoFinanceiro!.Value;
-        lancamento.StatusFinanceiro = dto.StatusFinanceiro!.Value;
+        lancamento.TelaClienteId = null;
+        lancamento.CompetenciaReferencia = CalculateCompetenciaReferencia(dataVencimentoFinanceiro);
+        lancamento.Descricao = string.IsNullOrWhiteSpace(dto.Descricao)
+            ? $"Mensalidade {cliente!.Nome}"
+            : dto.Descricao.Trim();
+        lancamento.Valor = valorAgrupado;
+        lancamento.DataVencimentoFinanceiro = dataVencimentoFinanceiro;
+        lancamento.StatusFinanceiro = statusFinanceiro;
         lancamento.DataPagamento = lancamento.StatusFinanceiro == StatusFinanceiro.Pago
             ? dto.DataPagamento ?? DateTime.UtcNow
             : dto.DataPagamento;
@@ -130,7 +134,7 @@ public class LancamentoFinanceiroService(
         lancamentoFinanceiroRepository.Update(lancamento);
         await lancamentoFinanceiroRepository.SaveChangesAsync(cancellationToken);
 
-        return OperationResult<LancamentoFinanceiroDto>.Ok(MapToDto(lancamento));
+        return OperationResult<LancamentoFinanceiroDto>.Ok(MapToDto(lancamento, cliente));
     }
 
     public async Task<OperationResult<LancamentoFinanceiroDto>> MarcarComoPagoAsync(
@@ -150,6 +154,69 @@ public class LancamentoFinanceiroService(
         await lancamentoFinanceiroRepository.SaveChangesAsync(cancellationToken);
 
         return OperationResult<LancamentoFinanceiroDto>.Ok(MapToDto(lancamento));
+    }
+
+    public async Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GerarPendentesAsync(
+        GerarLancamentosFinanceirosRequest request,
+        CancellationToken cancellationToken)
+    {
+        var dataReferencia = (request.DataReferencia ?? DateTime.UtcNow).Date;
+        var dataVencimentoAlvo = dataReferencia.AddDays(5);
+        var clientes = await clienteRepository.GetAllAsync(cancellationToken);
+        var gerados = new List<LancamentoFinanceiro>();
+
+        foreach (var cliente in clientes.Where(cliente => cliente.Ativo && cliente.DiaPagamentoPreferido is not null))
+        {
+            if (cliente.DiaPagamentoPreferido != dataVencimentoAlvo.Day)
+            {
+                continue;
+            }
+
+            var valorAgrupado = CalculateValorTelasAtivas(cliente);
+            if (valorAgrupado <= 0)
+            {
+                continue;
+            }
+
+            var exists = await lancamentoFinanceiroRepository.ExistsByClienteAndVencimentoAsync(
+                cliente.Id,
+                dataVencimentoAlvo,
+                cancellationToken);
+
+            if (exists)
+            {
+                continue;
+            }
+
+            var lancamento = new LancamentoFinanceiro
+            {
+                Id = Guid.NewGuid(),
+                ClienteId = cliente.Id,
+                TelaClienteId = null,
+                CompetenciaReferencia = CalculateCompetenciaReferencia(dataVencimentoAlvo),
+                Descricao = $"Mensalidade {cliente.Nome}",
+                Valor = valorAgrupado,
+                DataVencimentoFinanceiro = dataVencimentoAlvo,
+                StatusFinanceiro = StatusFinanceiro.Pendente,
+                Observacao = "Gerado automaticamente por regra de vencimento.",
+                DataCriacao = DateTime.UtcNow
+            };
+
+            await lancamentoFinanceiroRepository.AddAsync(lancamento, cancellationToken);
+            gerados.Add(lancamento);
+        }
+
+        if (gerados.Count > 0)
+        {
+            await lancamentoFinanceiroRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Ok(
+            gerados.Select(lancamento =>
+            {
+                var cliente = clientes.First(item => item.Id == lancamento.ClienteId);
+                return MapToDto(lancamento, cliente);
+            }).ToArray());
     }
 
     public async Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GetPendentesAsync(
@@ -184,9 +251,6 @@ public class LancamentoFinanceiroService(
 
     private static List<string> Validate(
         Guid? clienteId,
-        Guid? telaClienteId,
-        DateTime? competenciaReferencia,
-        decimal valor,
         DateTime? dataVencimentoFinanceiro,
         StatusFinanceiro? statusFinanceiro)
     {
@@ -195,21 +259,6 @@ public class LancamentoFinanceiroService(
         if (clienteId is null || clienteId == Guid.Empty)
         {
             errors.Add("ClienteId e obrigatorio.");
-        }
-
-        if (telaClienteId is null || telaClienteId == Guid.Empty)
-        {
-            errors.Add("TelaClienteId e obrigatorio.");
-        }
-
-        if (competenciaReferencia is null || competenciaReferencia == default)
-        {
-            errors.Add("CompetenciaReferencia e obrigatoria.");
-        }
-
-        if (valor <= 0)
-        {
-            errors.Add("Valor deve ser maior que zero.");
         }
 
         if (dataVencimentoFinanceiro is null || dataVencimentoFinanceiro == default)
@@ -225,48 +274,51 @@ public class LancamentoFinanceiroService(
         return errors;
     }
 
-    private async Task ValidateRelationsAsync(
+    private async Task<Cliente?> ValidateClienteAsync(
         Guid? clienteId,
-        Guid? telaClienteId,
         List<string> errors,
         CancellationToken cancellationToken)
     {
-        var clienteExists = false;
-
-        if (clienteId is not null && clienteId != Guid.Empty)
+        if (clienteId is null || clienteId == Guid.Empty)
         {
-            var cliente = await clienteRepository.GetByIdAsync(clienteId.Value, cancellationToken);
-            clienteExists = cliente is not null;
-
-            if (!clienteExists)
-            {
-                errors.Add("Cliente nao encontrado.");
-            }
+            return null;
         }
 
-        if (telaClienteId is not null && telaClienteId != Guid.Empty)
+        var cliente = await clienteRepository.GetByIdAsync(clienteId.Value, cancellationToken);
+        if (cliente is null)
         {
-            var telaCliente = await telaClienteRepository.GetByIdAsync(telaClienteId.Value, cancellationToken);
-            if (telaCliente is null)
-            {
-                errors.Add("TelaCliente nao encontrada.");
-                return;
-            }
-
-            if (clienteExists && clienteId != telaCliente.ClienteId)
-            {
-                errors.Add("TelaCliente nao pertence ao Cliente informado.");
-            }
+            errors.Add("Cliente nao encontrado.");
         }
+
+        return cliente;
+    }
+
+    private static decimal CalculateValorTelasAtivas(Cliente cliente)
+    {
+        return cliente.Telas
+            .Where(tela => tela.Ativo)
+            .Sum(tela => tela.ValorAcordado);
+    }
+
+    private static DateTime CalculateCompetenciaReferencia(DateTime dataVencimentoFinanceiro)
+    {
+        return new DateTime(dataVencimentoFinanceiro.Year, dataVencimentoFinanceiro.Month, 1);
     }
 
     private static LancamentoFinanceiroDto MapToDto(LancamentoFinanceiro lancamento)
+    {
+        return MapToDto(lancamento, lancamento.Cliente);
+    }
+
+    private static LancamentoFinanceiroDto MapToDto(LancamentoFinanceiro lancamento, Cliente? cliente)
     {
         return new LancamentoFinanceiroDto
         {
             Id = lancamento.Id,
             ClienteId = lancamento.ClienteId,
+            ClienteNome = cliente?.Nome ?? lancamento.Cliente?.Nome ?? string.Empty,
             TelaClienteId = lancamento.TelaClienteId,
+            TelaClienteNome = lancamento.TelaCliente?.NomeIdentificacao,
             CompetenciaReferencia = lancamento.CompetenciaReferencia,
             Descricao = lancamento.Descricao,
             Valor = lancamento.Valor,

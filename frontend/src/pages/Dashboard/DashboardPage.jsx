@@ -8,7 +8,10 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 })
 
 const metricConfig = [
+  { key: 'rendimentoMensal', label: 'Rendimento mensal', isCurrency: true },
+  { key: 'custoMensal', label: 'Custo mensal', isCurrency: true },
   { key: 'totalClientes', label: 'Total de clientes' },
+  { key: 'totalClientesPagosMes', label: 'Clientes pagos no mes' },
   { key: 'totalTelasAtivas', label: 'Telas ativas' },
   { key: 'totalTelasVencendo', label: 'Telas vencendo' },
   { key: 'totalTelasVencidas', label: 'Telas vencidas' },
@@ -90,35 +93,76 @@ function DashboardPage() {
         ))}
       </div>
 
-      <div className="card">
-        <div className="card-header bg-white">
-          <strong>Telas por servidor</strong>
-        </div>
-        <div className="table-responsive">
-          <table className="table table-striped table-hover mb-0">
-            <thead>
-              <tr>
-                <th>Servidor</th>
-                <th className="text-end">Quantidade de telas</th>
-              </tr>
-            </thead>
-            <tbody>
-              {telasPorServidor.length === 0 ? (
-                <tr>
-                  <td className="text-muted text-center" colSpan="2">
-                    Nenhum registro encontrado.
-                  </td>
-                </tr>
-              ) : (
-                telasPorServidor.map((item) => (
-                  <tr key={item.servidorId}>
-                    <td>{item.nomeServidor}</td>
-                    <td className="text-end">{item.quantidadeTelas}</td>
+      <div className="row g-3">
+        <div className="col-12 col-xl-8">
+          <div className="card h-100">
+            <div className="card-header bg-white">
+              <strong>Creditos e telas por servidor</strong>
+            </div>
+            <div className="table-responsive">
+              <table className="table table-striped table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Servidor</th>
+                    <th className="text-end">Creditos</th>
+                    <th className="text-end">Clientes</th>
+                    <th className="text-end">Telas</th>
+                    <th className="text-end">Custo estimado</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {telasPorServidor.length === 0 ? (
+                    <tr>
+                      <td className="text-muted text-center" colSpan="5">
+                        Nenhum registro encontrado.
+                      </td>
+                    </tr>
+                  ) : (
+                    telasPorServidor.map((item) => (
+                      <tr key={item.servidorId}>
+                        <td>
+                          <div>{item.nomeServidor}</div>
+                          <div className="text-muted small">
+                            Custo credito {currencyFormatter.format(item.valorCustoCredito ?? 0)}
+                          </div>
+                        </td>
+                        <td className="text-end">{item.quantidadeCreditos ?? 0}</td>
+                        <td className="text-end">{item.quantidadeClientes ?? 0}</td>
+                        <td className="text-end">{item.quantidadeTelas ?? 0}</td>
+                        <td className="text-end">{currencyFormatter.format(item.custoEstimado ?? 0)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-xl-4">
+          <div className="card h-100">
+            <div className="card-header bg-white">
+              <strong>Clientes pendentes</strong>
+            </div>
+            <div className="list-group list-group-flush">
+              {(resumo?.clientesPendentes ?? []).length === 0 ? (
+                <div className="list-group-item text-muted">Nenhuma pendencia financeira.</div>
+              ) : (
+                resumo.clientesPendentes.map((cliente) => (
+                  <div className="list-group-item" key={cliente.clienteId}>
+                    <div className="d-flex justify-content-between gap-2">
+                      <strong>{cliente.nomeCliente || 'Cliente'}</strong>
+                      <span>{currencyFormatter.format(cliente.valorEmAberto ?? 0)}</span>
+                    </div>
+                    <div className="text-muted small">
+                      {cliente.quantidadeLancamentos} lancamento(s), vence em{' '}
+                      {new Intl.DateTimeFormat('pt-BR').format(new Date(cliente.proximoVencimento))}
+                    </div>
+                  </div>
                 ))
               )}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </section>

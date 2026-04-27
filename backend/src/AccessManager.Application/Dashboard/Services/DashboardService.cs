@@ -15,16 +15,36 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
 
         var totalClientesTask = dashboardRepository.CountClientesAsync(cancellationToken);
         var telasTask = dashboardRepository.GetTelasAsync(cancellationToken);
+        var servidoresTask = dashboardRepository.GetServidoresAsync(cancellationToken);
         var lancamentosTask = dashboardRepository.GetLancamentosFinanceirosAsync(cancellationToken);
 
-        await Task.WhenAll(totalClientesTask, telasTask, lancamentosTask);
+        await Task.WhenAll(totalClientesTask, telasTask, servidoresTask, lancamentosTask);
 
         var telas = telasTask.Result;
+        var servidores = servidoresTask.Result;
         var lancamentos = lancamentosTask.Result;
+        var primeiroDiaMes = new DateTime(hoje.Year, hoje.Month, 1);
+        var primeiroDiaProximoMes = primeiroDiaMes.AddMonths(1);
 
         var resumo = new DashboardResumoDto
         {
+            RendimentoMensal = lancamentos
+                .Where(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pago &&
+                    lancamento.DataPagamento is not null &&
+                    lancamento.DataPagamento.Value.Date >= primeiroDiaMes &&
+                    lancamento.DataPagamento.Value.Date < primeiroDiaProximoMes)
+                .Sum(lancamento => lancamento.Valor),
+            CustoMensal = servidores.Sum(servidor =>
+                telas.Count(tela => tela.Ativo && tela.ServidorId == servidor.Id) * servidor.ValorCustoCredito),
             TotalClientes = totalClientesTask.Result,
+            TotalClientesPagosMes = lancamentos
+                .Where(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pago &&
+                    lancamento.DataPagamento is not null &&
+                    lancamento.DataPagamento.Value.Date >= primeiroDiaMes &&
+                    lancamento.DataPagamento.Value.Date < primeiroDiaProximoMes)
+                .Select(lancamento => lancamento.ClienteId)
+                .Distinct()
+                .Count(),
             TotalTelasVencidas = telas.Count(tela => IsTelaVencida(tela, hoje)),
             TotalTelasVencendo = telas.Count(tela => IsTelaVencendo(tela, hoje, limiteVencendo)),
             TotalTelasAtivas = telas.Count(tela => IsTelaAtiva(tela, limiteVencendo)),
@@ -32,7 +52,24 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
             TotalLancamentosAtrasados = lancamentos.Count(lancamento => IsLancamentoAtrasado(lancamento, hoje)),
             TotalEmAberto = lancamentos
                 .Where(IsLancamentoEmAberto)
-                .Sum(lancamento => lancamento.Valor)
+                .Sum(lancamento => lancamento.Valor),
+            ClientesPendentes = lancamentos
+                .Where(IsLancamentoEmAberto)
+                .GroupBy(lancamento => new
+                {
+                    lancamento.ClienteId,
+                    NomeCliente = lancamento.Cliente == null ? string.Empty : lancamento.Cliente.Nome
+                })
+                .Select(grupo => new ClientePendenteFinanceiroDto
+                {
+                    ClienteId = grupo.Key.ClienteId,
+                    NomeCliente = grupo.Key.NomeCliente,
+                    QuantidadeLancamentos = grupo.Count(),
+                    ValorEmAberto = grupo.Sum(lancamento => lancamento.Valor),
+                    ProximoVencimento = grupo.Min(lancamento => lancamento.DataVencimentoFinanceiro)
+                })
+                .OrderBy(item => item.ProximoVencimento)
+                .ToArray()
         };
 
         return OperationResult<DashboardResumoDto>.Ok(resumo);

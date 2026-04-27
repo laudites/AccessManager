@@ -34,5 +34,16 @@ public class LancamentoFinanceiroConfiguration : IEntityTypeConfiguration<Lancam
 
         builder.Property(lancamento => lancamento.DataCriacao)
             .IsRequired();
+
+        builder.HasOne(lancamento => lancamento.Cliente)
+            .WithMany(cliente => cliente.LancamentosFinanceiros)
+            .HasForeignKey(lancamento => lancamento.ClienteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(lancamento => lancamento.TelaCliente)
+            .WithMany(tela => tela.LancamentosFinanceiros)
+            .HasForeignKey(lancamento => lancamento.TelaClienteId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
     }
 }

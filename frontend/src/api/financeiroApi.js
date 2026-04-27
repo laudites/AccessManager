@@ -86,3 +86,15 @@ export async function marcarLancamentoPago(id) {
     handleApiError(error)
   }
 }
+
+export async function gerarLancamentosPendentes(dataReferencia) {
+  try {
+    const response = await httpClient.post('/api/lancamentos-financeiros/gerar-pendentes', {
+      dataReferencia: dataReferencia || null,
+    })
+
+    return unwrapApiResponse(response, [])
+  } catch (error) {
+    handleApiError(error)
+  }
+}

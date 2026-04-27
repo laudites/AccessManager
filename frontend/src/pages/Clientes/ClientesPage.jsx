@@ -9,6 +9,11 @@ import {
 import FeedbackAlert from '../../components/FeedbackAlert'
 import LoadingButton from '../../components/LoadingButton'
 
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+})
+
 const emptyForm = {
   nome: '',
   telefone: '',
@@ -235,6 +240,8 @@ function ClientesPage() {
                     <th>Nome</th>
                     <th>Telefone</th>
                     <th>Dia pagamento</th>
+                    <th className="text-end">Telas</th>
+                    <th className="text-end">Valor telas</th>
                     <th>Status</th>
                     <th className="text-end">Acoes</th>
                   </tr>
@@ -242,13 +249,13 @@ function ClientesPage() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="5">
+                      <td className="text-muted text-center" colSpan="7">
                         Carregando clientes...
                       </td>
                     </tr>
                   ) : sortedClientes.length === 0 ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="5">
+                      <td className="text-muted text-center" colSpan="7">
                         Nenhum cliente encontrado.
                       </td>
                     </tr>
@@ -258,6 +265,8 @@ function ClientesPage() {
                         <td>{cliente.nome}</td>
                         <td>{cliente.telefone || '-'}</td>
                         <td>{cliente.diaPagamentoPreferido ?? '-'}</td>
+                        <td className="text-end">{cliente.quantidadeTelas ?? 0}</td>
+                        <td className="text-end">{currencyFormatter.format(cliente.valorTotalTelas ?? 0)}</td>
                         <td>
                           <span className={`badge ${cliente.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
                             {cliente.ativo ? 'Ativo' : 'Inativo'}
@@ -307,6 +316,10 @@ function ClientesPage() {
                   <dl className="row mb-0">
                     <dt className="col-sm-5">Data cadastro</dt>
                     <dd className="col-sm-7">{formatDate(selectedCliente.dataCadastro)}</dd>
+                    <dt className="col-sm-5">Telas ativas</dt>
+                    <dd className="col-sm-7">{selectedCliente.quantidadeTelas ?? 0}</dd>
+                    <dt className="col-sm-5">Valor total telas</dt>
+                    <dd className="col-sm-7">{currencyFormatter.format(selectedCliente.valorTotalTelas ?? 0)}</dd>
                     <dt className="col-sm-5">Identificador</dt>
                     <dd className="col-sm-7 text-break">{selectedCliente.id}</dd>
                   </dl>

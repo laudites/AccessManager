@@ -3,6 +3,7 @@ import { getClientes } from '../../api/clientesApi'
 import {
   createLancamentoFinanceiro,
   deleteLancamentoFinanceiro,
+  gerarLancamentosPendentes,
   getLancamentoFinanceiroById,
   getLancamentosAtrasados,
   getLancamentosFinanceiros,
@@ -10,7 +11,6 @@ import {
   marcarLancamentoPago,
   updateLancamentoFinanceiro,
 } from '../../api/financeiroApi'
-import { getTelas } from '../../api/telasApi'
 import FeedbackAlert from '../../components/FeedbackAlert'
 import LoadingButton from '../../components/LoadingButton'
 
@@ -34,35 +34,22 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 
 const emptyForm = {
   clienteId: '',
-  telaClienteId: '',
-  competenciaReferencia: '',
   descricao: '',
-  valor: '',
   dataVencimentoFinanceiro: '',
   statusFinanceiro: '1',
   observacao: '',
 }
 
 function toDateInputValue(value) {
-  if (!value) {
-    return ''
-  }
-
-  return value.slice(0, 10)
+  return value ? value.slice(0, 10) : ''
 }
 
 function formatDate(value) {
-  if (!value) {
-    return '-'
-  }
-
-  return new Intl.DateTimeFormat('pt-BR').format(new Date(value))
+  return value ? new Intl.DateTimeFormat('pt-BR').format(new Date(value)) : '-'
 }
 
 function getStatusOption(status) {
-  const numericStatus = Number(status)
-
-  return statusOptions.find((option) => option.value === numericStatus)
+  return statusOptions.find((option) => option.value === Number(status))
 }
 
 function getStatusLabel(status) {
@@ -73,21 +60,14 @@ function getStatusBadge(status) {
   return getStatusOption(status)?.badge ?? 'text-bg-secondary'
 }
 
-function getNameById(items, id) {
-  return items.find((item) => item.id === id)?.nome ?? '-'
-}
-
-function getTelaNameById(telas, id) {
-  return telas.find((tela) => tela.id === id)?.nomeIdentificacao ?? '-'
+function getClienteById(clientes, id) {
+  return clientes.find((cliente) => cliente.id === id)
 }
 
 function toFormData(lancamento) {
   return {
     clienteId: lancamento?.clienteId ?? '',
-    telaClienteId: lancamento?.telaClienteId ?? '',
-    competenciaReferencia: toDateInputValue(lancamento?.competenciaReferencia),
     descricao: lancamento?.descricao ?? '',
-    valor: lancamento?.valor === undefined ? '' : String(lancamento.valor),
     dataVencimentoFinanceiro: toDateInputValue(lancamento?.dataVencimentoFinanceiro),
     statusFinanceiro: String(lancamento?.statusFinanceiro ?? 1),
     observacao: lancamento?.observacao ?? '',
@@ -97,10 +77,7 @@ function toFormData(lancamento) {
 function buildPayload(formData) {
   return {
     clienteId: formData.clienteId || null,
-    telaClienteId: formData.telaClienteId || null,
-    competenciaReferencia: formData.competenciaReferencia || null,
     descricao: formData.descricao.trim(),
-    valor: Number(formData.valor),
     dataVencimentoFinanceiro: formData.dataVencimentoFinanceiro || null,
     statusFinanceiro: Number(formData.statusFinanceiro),
     observacao: formData.observacao.trim() || null,
@@ -108,23 +85,10 @@ function buildPayload(formData) {
 }
 
 function getValidationError(formData) {
-  const valor = Number(formData.valor)
   const statusFinanceiro = Number(formData.statusFinanceiro)
 
   if (!formData.clienteId) {
     return 'Campo obrigatorio: Cliente.'
-  }
-
-  if (!formData.telaClienteId) {
-    return 'Campo obrigatorio: Tela.'
-  }
-
-  if (!formData.competenciaReferencia) {
-    return 'Campo obrigatorio: Competencia.'
-  }
-
-  if (!Number.isFinite(valor) || valor <= 0) {
-    return 'Valor deve ser maior que zero.'
   }
 
   if (!formData.dataVencimentoFinanceiro) {
@@ -141,34 +105,23 @@ function getValidationError(formData) {
 function FinanceiroPage() {
   const [lancamentos, setLancamentos] = useState([])
   const [clientes, setClientes] = useState([])
-  const [telas, setTelas] = useState([])
   const [selectedLancamento, setSelectedLancamento] = useState(null)
   const [formData, setFormData] = useState(emptyForm)
-  const [filters, setFilters] = useState({ clienteId: '', telaClienteId: '', statusFinanceiro: '' })
+  const [filters, setFilters] = useState({ clienteId: '', statusFinanceiro: '' })
   const [viewMode, setViewMode] = useState('todos')
   const [mode, setMode] = useState('create')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isMarkingPaid, setIsMarkingPaid] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
-  const filteredFormTelas = useMemo(() => {
-    if (!formData.clienteId) {
-      return telas
-    }
-
-    return telas.filter((tela) => tela.clienteId === formData.clienteId)
-  }, [formData.clienteId, telas])
-
-  const filteredFilterTelas = useMemo(() => {
-    if (!filters.clienteId) {
-      return telas
-    }
-
-    return telas.filter((tela) => tela.clienteId === filters.clienteId)
-  }, [filters.clienteId, telas])
+  const selectedCliente = useMemo(
+    () => getClienteById(clientes, formData.clienteId),
+    [clientes, formData.clienteId],
+  )
 
   const sortedLancamentos = useMemo(
     () =>
@@ -179,10 +132,7 @@ function FinanceiroPage() {
   )
 
   async function loadReferences() {
-    const [clientesData, telasData] = await Promise.all([getClientes(), getTelas()])
-
-    setClientes(clientesData)
-    setTelas(telasData)
+    setClientes(await getClientes())
   }
 
   async function loadLancamentos(nextViewMode = viewMode, nextFilters = filters) {
@@ -259,35 +209,19 @@ function FinanceiroPage() {
   function handleChange(event) {
     const { name, value } = event.target
 
-    setFormData((current) => {
-      const nextForm = {
-        ...current,
-        [name]: value,
-      }
-
-      if (name === 'clienteId' && current.clienteId !== value) {
-        nextForm.telaClienteId = ''
-      }
-
-      return nextForm
-    })
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }))
   }
 
   function handleFilterChange(event) {
     const { name, value } = event.target
 
-    setFilters((current) => {
-      const nextFilters = {
-        ...current,
-        [name]: value,
-      }
-
-      if (name === 'clienteId' && current.clienteId !== value) {
-        nextFilters.telaClienteId = ''
-      }
-
-      return nextFilters
-    })
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }))
   }
 
   async function handleViewModeChange(nextViewMode) {
@@ -306,7 +240,7 @@ function FinanceiroPage() {
   }
 
   async function handleClearFilters() {
-    const emptyFilters = { clienteId: '', telaClienteId: '', statusFinanceiro: '' }
+    const emptyFilters = { clienteId: '', statusFinanceiro: '' }
 
     setFilters(emptyFilters)
     setViewMode('todos')
@@ -397,6 +331,23 @@ function FinanceiroPage() {
     }
   }
 
+  async function handleGerarPendentes() {
+    try {
+      setIsGenerating(true)
+      setError('')
+      setMessage('')
+
+      const gerados = await gerarLancamentosPendentes()
+
+      await loadLancamentos(viewMode, filters)
+      setMessage(`${gerados.length} lancamento(s) pendente(s) gerado(s).`)
+    } catch (apiError) {
+      setError(`Erro ao gerar pendentes. ${apiError.message}`)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   const isFormReadonly = mode === 'view'
   const panelTitle =
     mode === 'edit' ? 'Editar lancamento' : mode === 'view' ? 'Detalhe do lancamento' : 'Novo lancamento'
@@ -406,9 +357,17 @@ function FinanceiroPage() {
       <div className="d-flex flex-column flex-md-row justify-content-between gap-2 mb-4">
         <div>
           <h1>Financeiro</h1>
-          <p className="text-muted mb-0">Lancamentos financeiros manuais.</p>
+          <p className="text-muted mb-0">Lancamentos financeiros por cliente.</p>
         </div>
-        <div>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-primary"
+            type="button"
+            onClick={handleGerarPendentes}
+            disabled={isGenerating}
+          >
+            {isGenerating ? 'Gerando...' : 'Gerar pendentes'}
+          </button>
           <button className="btn btn-primary" type="button" onClick={handleCreateMode}>
             Novo lancamento
           </button>
@@ -435,7 +394,7 @@ function FinanceiroPage() {
       <form className="card mb-3" onSubmit={handleApplyFilters}>
         <div className="card-body">
           <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-3">
+            <div className="col-12 col-md-4">
               <label className="form-label" htmlFor="filtroCliente">
                 Cliente
               </label>
@@ -455,27 +414,7 @@ function FinanceiroPage() {
               </select>
             </div>
 
-            <div className="col-12 col-md-3">
-              <label className="form-label" htmlFor="filtroTelaCliente">
-                Tela
-              </label>
-              <select
-                className="form-select"
-                id="filtroTelaCliente"
-                name="telaClienteId"
-                value={filters.telaClienteId}
-                onChange={handleFilterChange}
-              >
-                <option value="">Todas</option>
-                {filteredFilterTelas.map((tela) => (
-                  <option key={tela.id} value={tela.id}>
-                    {tela.nomeIdentificacao}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-12 col-md-3">
+            <div className="col-12 col-md-4">
               <label className="form-label" htmlFor="filtroStatusFinanceiro">
                 Status
               </label>
@@ -495,7 +434,7 @@ function FinanceiroPage() {
               </select>
             </div>
 
-            <div className="col-12 col-md-3 d-flex gap-2">
+            <div className="col-12 col-md-4 d-flex gap-2">
               <button className="btn btn-outline-primary w-100" type="submit" disabled={isLoading}>
                 Filtrar
               </button>
@@ -524,7 +463,6 @@ function FinanceiroPage() {
                   <tr>
                     <th>Descricao</th>
                     <th>Cliente</th>
-                    <th>Tela</th>
                     <th>Status</th>
                     <th>Vencimento</th>
                     <th className="text-end">Valor</th>
@@ -534,13 +472,13 @@ function FinanceiroPage() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="7">
+                      <td className="text-muted text-center" colSpan="6">
                         Carregando lancamentos...
                       </td>
                     </tr>
                   ) : sortedLancamentos.length === 0 ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="7">
+                      <td className="text-muted text-center" colSpan="6">
                         Nenhum lancamento encontrado.
                       </td>
                     </tr>
@@ -549,10 +487,9 @@ function FinanceiroPage() {
                       <tr key={lancamento.id}>
                         <td>
                           <div>{lancamento.descricao || '-'}</div>
-                          <div className="text-muted small">{formatDate(lancamento.competenciaReferencia)}</div>
+                          <div className="text-muted small">Competencia {formatDate(lancamento.competenciaReferencia)}</div>
                         </td>
-                        <td>{getNameById(clientes, lancamento.clienteId)}</td>
-                        <td>{getTelaNameById(telas, lancamento.telaClienteId)}</td>
+                        <td>{lancamento.clienteNome || getClienteById(clientes, lancamento.clienteId)?.nome || '-'}</td>
                         <td>
                           <span className={`badge ${getStatusBadge(lancamento.statusFinanceiro)}`}>
                             {getStatusLabel(lancamento.statusFinanceiro)}
@@ -610,6 +547,8 @@ function FinanceiroPage() {
               {mode === 'view' && selectedLancamento ? (
                 <div className="mb-4">
                   <dl className="row mb-0">
+                    <dt className="col-sm-5">Competencia</dt>
+                    <dd className="col-sm-7">{formatDate(selectedLancamento.competenciaReferencia)}</dd>
                     <dt className="col-sm-5">Data pagamento</dt>
                     <dd className="col-sm-7">{formatDate(selectedLancamento.dataPagamento)}</dd>
                     <dt className="col-sm-5">Data criacao</dt>
@@ -621,53 +560,43 @@ function FinanceiroPage() {
               ) : null}
 
               <form onSubmit={handleSubmit}>
-                <div className="row g-3">
-                  <div className="col-12 col-md-6">
-                    <label className="form-label" htmlFor="clienteId">
-                      Cliente
-                    </label>
-                    <select
-                      className="form-select"
-                      id="clienteId"
-                      name="clienteId"
-                      value={formData.clienteId}
-                      onChange={handleChange}
-                      disabled={isFormReadonly}
-                      required
-                    >
-                      <option value="">Selecione</option>
-                      {clientes.map((cliente) => (
-                        <option key={cliente.id} value={cliente.id}>
-                          {cliente.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-12 col-md-6">
-                    <label className="form-label" htmlFor="telaClienteId">
-                      Tela
-                    </label>
-                    <select
-                      className="form-select"
-                      id="telaClienteId"
-                      name="telaClienteId"
-                      value={formData.telaClienteId}
-                      onChange={handleChange}
-                      disabled={isFormReadonly}
-                      required
-                    >
-                      <option value="">Selecione</option>
-                      {filteredFormTelas.map((tela) => (
-                        <option key={tela.id} value={tela.id}>
-                          {tela.nomeIdentificacao}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor="clienteId">
+                    Cliente
+                  </label>
+                  <select
+                    className="form-select"
+                    id="clienteId"
+                    name="clienteId"
+                    value={formData.clienteId}
+                    onChange={handleChange}
+                    disabled={isFormReadonly}
+                    required
+                  >
+                    <option value="">Selecione</option>
+                    {clientes.map((cliente) => (
+                      <option key={cliente.id} value={cliente.id}>
+                        {cliente.nome}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="mb-3 mt-3">
+                <div className="mb-3">
+                  <label className="form-label">Valor agrupado das telas ativas</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={currencyFormatter.format(
+                      mode === 'view'
+                        ? selectedLancamento?.valor ?? 0
+                        : selectedCliente?.valorTotalTelas ?? 0,
+                    )}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-3">
                   <label className="form-label" htmlFor="descricao">
                     Descricao
                   </label>
@@ -685,22 +614,6 @@ function FinanceiroPage() {
 
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="form-label" htmlFor="competenciaReferencia">
-                      Competencia
-                    </label>
-                    <input
-                      className="form-control"
-                      id="competenciaReferencia"
-                      name="competenciaReferencia"
-                      type="date"
-                      value={formData.competenciaReferencia}
-                      onChange={handleChange}
-                      disabled={isFormReadonly}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 col-md-6">
                     <label className="form-label" htmlFor="dataVencimentoFinanceiro">
                       Vencimento financeiro
                     </label>
@@ -710,27 +623,6 @@ function FinanceiroPage() {
                       name="dataVencimentoFinanceiro"
                       type="date"
                       value={formData.dataVencimentoFinanceiro}
-                      onChange={handleChange}
-                      disabled={isFormReadonly}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="row g-3 mt-0">
-                  <div className="col-12 col-md-6">
-                    <label className="form-label" htmlFor="valor">
-                      Valor
-                    </label>
-                    <input
-                      className="form-control"
-                      id="valor"
-                      name="valor"
-                      placeholder="0,00"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={formData.valor}
                       onChange={handleChange}
                       disabled={isFormReadonly}
                       required

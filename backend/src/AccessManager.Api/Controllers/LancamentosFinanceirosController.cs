@@ -103,6 +103,16 @@ public class LancamentosFinanceirosController(ILancamentoFinanceiroService lanca
         return Ok(ApiResponse<LancamentoFinanceiroDto>.Ok(result.Data!));
     }
 
+    [HttpPost("gerar-pendentes")]
+    public async Task<IActionResult> GerarPendentes(
+        GerarLancamentosFinanceirosRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await lancamentoFinanceiroService.GerarPendentesAsync(request, cancellationToken);
+
+        return Ok(ApiResponse<IReadOnlyCollection<LancamentoFinanceiroDto>>.Ok(result.Data!));
+    }
+
     [HttpGet("pendentes")]
     public async Task<IActionResult> GetPendentes(CancellationToken cancellationToken)
     {

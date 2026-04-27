@@ -8,7 +8,7 @@ public class CreateLancamentoFinanceiroDto
     public Guid? TelaClienteId { get; set; }
     public DateTime? CompetenciaReferencia { get; set; }
     public string Descricao { get; set; } = string.Empty;
-    public decimal Valor { get; set; }
+    public decimal? Valor { get; set; }
     public DateTime? DataVencimentoFinanceiro { get; set; }
     public DateTime? DataPagamento { get; set; }
     public StatusFinanceiro? StatusFinanceiro { get; set; }

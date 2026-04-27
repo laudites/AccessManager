@@ -19,6 +19,9 @@ public interface ILancamentoFinanceiroService
     Task<OperationResult<LancamentoFinanceiroDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<OperationResult<LancamentoFinanceiroDto>> UpdateAsync(Guid id, UpdateLancamentoFinanceiroDto dto, CancellationToken cancellationToken);
     Task<OperationResult<LancamentoFinanceiroDto>> MarcarComoPagoAsync(Guid id, CancellationToken cancellationToken);
+    Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GerarPendentesAsync(
+        GerarLancamentosFinanceirosRequest request,
+        CancellationToken cancellationToken);
     Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GetPendentesAsync(CancellationToken cancellationToken);
     Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GetAtrasadosAsync(CancellationToken cancellationToken);
     Task<OperationResult> DeleteAsync(Guid id, CancellationToken cancellationToken);

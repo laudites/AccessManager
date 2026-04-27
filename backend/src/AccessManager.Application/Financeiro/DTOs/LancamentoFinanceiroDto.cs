@@ -6,7 +6,9 @@ public class LancamentoFinanceiroDto
 {
     public Guid Id { get; set; }
     public Guid ClienteId { get; set; }
-    public Guid TelaClienteId { get; set; }
+    public string ClienteNome { get; set; } = string.Empty;
+    public Guid? TelaClienteId { get; set; }
+    public string? TelaClienteNome { get; set; }
     public DateTime CompetenciaReferencia { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public decimal Valor { get; set; }

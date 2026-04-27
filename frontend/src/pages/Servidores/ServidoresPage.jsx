@@ -16,11 +16,17 @@ const statusOptions = [
   { value: 3, label: 'Inativo', badge: 'text-bg-secondary' },
 ]
 
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+})
+
 const emptyForm = {
   nome: '',
   descricao: '',
   status: '1',
-  limiteClientes: '0',
+  quantidadeCreditos: '0',
+  valorCustoCredito: '0',
   usuarioPainel: '',
   senhaPainel: '',
   observacao: '',
@@ -46,7 +52,8 @@ function toFormData(servidor) {
     nome: servidor?.nome ?? '',
     descricao: servidor?.descricao ?? '',
     status: String(servidor?.status ?? 1),
-    limiteClientes: String(servidor?.limiteClientes ?? 0),
+    quantidadeCreditos: String(servidor?.quantidadeCreditos ?? 0),
+    valorCustoCredito: String(servidor?.valorCustoCredito ?? 0),
     usuarioPainel: servidor?.usuarioPainel ?? '',
     senhaPainel: servidor?.senhaPainel ?? '',
     observacao: servidor?.observacao ?? '',
@@ -59,7 +66,8 @@ function buildPayload(formData, includeAtivo) {
     nome: formData.nome.trim(),
     descricao: formData.descricao.trim() || null,
     status: Number(formData.status),
-    limiteClientes: Number(formData.limiteClientes),
+    quantidadeCreditos: Number(formData.quantidadeCreditos),
+    valorCustoCredito: Number(formData.valorCustoCredito),
     usuarioPainel: formData.usuarioPainel.trim(),
     senhaPainel: formData.senhaPainel.trim(),
     observacao: formData.observacao.trim() || null,
@@ -73,15 +81,20 @@ function buildPayload(formData, includeAtivo) {
 }
 
 function getValidationError(formData) {
-  const limiteClientes = Number(formData.limiteClientes)
+  const quantidadeCreditos = Number(formData.quantidadeCreditos)
+  const valorCustoCredito = Number(formData.valorCustoCredito)
   const status = Number(formData.status)
 
   if (!formData.nome.trim()) {
     return 'Campo obrigatorio: Nome.'
   }
 
-  if (!Number.isInteger(limiteClientes) || limiteClientes < 0) {
-    return 'LimiteClientes deve ser maior ou igual a zero.'
+  if (!Number.isInteger(quantidadeCreditos) || quantidadeCreditos < 0) {
+    return 'Quantidade de creditos deve ser maior ou igual a zero.'
+  }
+
+  if (!Number.isFinite(valorCustoCredito) || valorCustoCredito < 0) {
+    return 'Valor de custo por credito deve ser maior ou igual a zero.'
   }
 
   if (!statusOptions.some((option) => option.value === status)) {
@@ -288,7 +301,8 @@ function ServidoresPage() {
                   <tr>
                     <th>Nome</th>
                     <th>Status</th>
-                    <th>Limite</th>
+                    <th className="text-end">Creditos</th>
+                    <th className="text-end">Custo credito</th>
                     <th>Ativo</th>
                     <th className="text-end">Acoes</th>
                   </tr>
@@ -296,13 +310,13 @@ function ServidoresPage() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="5">
+                      <td className="text-muted text-center" colSpan="6">
                         Carregando servidores...
                       </td>
                     </tr>
                   ) : sortedServidores.length === 0 ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="5">
+                      <td className="text-muted text-center" colSpan="6">
                         Nenhum servidor encontrado.
                       </td>
                     </tr>
@@ -318,7 +332,8 @@ function ServidoresPage() {
                             {getStatusLabel(servidor.status)}
                           </span>
                         </td>
-                        <td>{servidor.limiteClientes}</td>
+                        <td className="text-end">{servidor.quantidadeCreditos ?? 0}</td>
+                        <td className="text-end">{currencyFormatter.format(servidor.valorCustoCredito ?? 0)}</td>
                         <td>
                           <span className={`badge ${servidor.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
                             {servidor.ativo ? 'Sim' : 'Nao'}
@@ -445,21 +460,39 @@ function ServidoresPage() {
                   </div>
 
                   <div className="col-12 col-md-6">
-                    <label className="form-label" htmlFor="limiteClientes">
-                      Limite clientes
+                    <label className="form-label" htmlFor="quantidadeCreditos">
+                      Quantidade de creditos
                     </label>
                     <input
                       className="form-control"
-                      id="limiteClientes"
-                      name="limiteClientes"
+                      id="quantidadeCreditos"
+                      name="quantidadeCreditos"
                       placeholder="0"
                       type="number"
                       min="0"
-                      value={formData.limiteClientes}
+                      value={formData.quantidadeCreditos}
                       onChange={handleChange}
                       disabled={isFormReadonly}
                     />
                   </div>
+                </div>
+
+                <div className="mb-3 mt-3">
+                  <label className="form-label" htmlFor="valorCustoCredito">
+                    Valor de custo por credito
+                  </label>
+                  <input
+                    className="form-control"
+                    id="valorCustoCredito"
+                    name="valorCustoCredito"
+                    placeholder="0,00"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.valorCustoCredito}
+                    onChange={handleChange}
+                    disabled={isFormReadonly}
+                  />
                 </div>
 
                 <div className="row g-3 mt-0">

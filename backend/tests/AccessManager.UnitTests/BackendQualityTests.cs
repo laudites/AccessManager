@@ -53,7 +53,7 @@ public class BackendQualityTests
     }
 
     [Fact]
-    public async Task Servidor_LimiteClientesNegativo_DeveFalhar()
+    public async Task Servidor_QuantidadeCreditosNegativa_DeveFalhar()
     {
         var service = new ServidorService(new ServidorRepositoryFake());
 
@@ -61,13 +61,32 @@ public class BackendQualityTests
         {
             Nome = "Servidor Teste",
             Status = StatusServidor.Ativo,
-            LimiteClientes = -1,
+            QuantidadeCreditos = -1,
             UsuarioPainel = "admin",
             SenhaPainel = "senha"
         }, CancellationToken.None);
 
         Assert.False(result.Success);
-        Assert.Contains(result.Errors, error => error.Contains("LimiteClientes"));
+        Assert.Contains(result.Errors, error => error.Contains("QuantidadeCreditos"));
+    }
+
+    [Fact]
+    public async Task Servidor_ValorCustoCreditoNegativo_DeveFalhar()
+    {
+        var service = new ServidorService(new ServidorRepositoryFake());
+
+        var result = await service.CreateAsync(new CreateServidorDto
+        {
+            Nome = "Servidor Teste",
+            Status = StatusServidor.Ativo,
+            QuantidadeCreditos = 10,
+            ValorCustoCredito = -1,
+            UsuarioPainel = "admin",
+            SenhaPainel = "senha"
+        }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.Contains(result.Errors, error => error.Contains("ValorCustoCredito"));
     }
 
     [Fact]
@@ -138,8 +157,7 @@ public class BackendQualityTests
         };
         var service = new LancamentoFinanceiroService(
             new LancamentoFinanceiroRepositoryFake(lancamento),
-            new ClienteRepositoryFake(new Cliente { Id = tela.ClienteId, Nome = "Cliente" }),
-            new TelaClienteRepositoryFake(tela));
+            new ClienteRepositoryFake(new Cliente { Id = tela.ClienteId, Nome = "Cliente", Telas = [tela] }));
 
         var result = await service.MarcarComoPagoAsync(lancamento.Id, CancellationToken.None);
 
@@ -149,32 +167,89 @@ public class BackendQualityTests
         Assert.Equal(vencimentoTecnicoOriginal, tela.DataVencimentoTecnico);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Financeiro_ValorMenorOuIgualAZero_DeveFalhar(decimal valor)
+    [Fact]
+    public async Task Financeiro_DeveAgruparValorDasTelasAtivasDoCliente()
     {
-        var tela = new TelaCliente
+        var clienteId = Guid.NewGuid();
+        var telas = new[]
         {
-            Id = Guid.NewGuid(),
-            ClienteId = Guid.NewGuid()
+            new TelaCliente { Id = Guid.NewGuid(), ClienteId = clienteId, ValorAcordado = 30, Ativo = true },
+            new TelaCliente { Id = Guid.NewGuid(), ClienteId = clienteId, ValorAcordado = 40, Ativo = true },
+            new TelaCliente { Id = Guid.NewGuid(), ClienteId = clienteId, ValorAcordado = 99, Ativo = false }
         };
+        var cliente = new Cliente { Id = clienteId, Nome = "Cliente", Telas = telas };
         var service = new LancamentoFinanceiroService(
             new LancamentoFinanceiroRepositoryFake(),
-            new ClienteRepositoryFake(new Cliente { Id = tela.ClienteId, Nome = "Cliente" }),
-            new TelaClienteRepositoryFake(tela));
+            new ClienteRepositoryFake(cliente));
 
         var result = await service.CreateAsync(new CreateLancamentoFinanceiroDto
         {
-            ClienteId = tela.ClienteId,
-            TelaClienteId = tela.Id,
-            CompetenciaReferencia = DateTime.UtcNow.Date,
-            Valor = valor,
+            ClienteId = clienteId,
             DataVencimentoFinanceiro = DateTime.UtcNow.Date.AddDays(5)
         }, CancellationToken.None);
 
-        Assert.False(result.Success);
-        Assert.Contains(result.Errors, error => error.Contains("Valor"));
+        Assert.True(result.Success);
+        Assert.Equal(70, result.Data!.Valor);
+        Assert.Equal(new DateTime(result.Data.DataVencimentoFinanceiro.Year, result.Data.DataVencimentoFinanceiro.Month, 1), result.Data.CompetenciaReferencia);
+        Assert.Null(result.Data.TelaClienteId);
+    }
+
+    [Fact]
+    public async Task Cliente_DeveRetornarQuantidadeTelasEValorAgrupado()
+    {
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nome = "Cliente",
+            Telas =
+            [
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 25, Ativo = true },
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 35, Ativo = true },
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 50, Ativo = false }
+            ]
+        };
+        var service = new ClienteService(new ClienteRepositoryFake(cliente));
+
+        var result = await service.GetByIdAsync(cliente.Id, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal(2, result.Data!.QuantidadeTelas);
+        Assert.Equal(60, result.Data.ValorTotalTelas);
+    }
+
+    [Fact]
+    public async Task Dashboard_DeveCalcularRendimentoMensalECustoMensal()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var servidorId = Guid.NewGuid();
+        var repository = new DashboardRepositoryFake(
+            telas:
+            [
+                new TelaCliente { Id = Guid.NewGuid(), ServidorId = servidorId, Ativo = true, DataVencimentoTecnico = hoje.AddDays(10) },
+                new TelaCliente { Id = Guid.NewGuid(), ServidorId = servidorId, Ativo = true, DataVencimentoTecnico = hoje.AddDays(10) }
+            ],
+            lancamentos:
+            [
+                new LancamentoFinanceiro
+                {
+                    Id = Guid.NewGuid(),
+                    ClienteId = Guid.NewGuid(),
+                    Valor = 100,
+                    StatusFinanceiro = StatusFinanceiro.Pago,
+                    DataPagamento = hoje
+                }
+            ],
+            servidores:
+            [
+                new Servidor { Id = servidorId, Nome = "Servidor", ValorCustoCredito = 7 }
+            ]);
+        var service = new DashboardService(repository);
+
+        var result = await service.GetResumoAsync(CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal(100, result.Data!.RendimentoMensal);
+        Assert.Equal(14, result.Data.CustoMensal);
     }
 
     private sealed class ClienteRepositoryFake(params Cliente[] clientes) : IClienteRepository
@@ -335,6 +410,17 @@ public class BackendQualityTests
                 _lancamentos.Where(lancamento => lancamento.DataVencimentoFinanceiro.Date < hoje).ToArray());
         }
 
+        public Task<bool> ExistsByClienteAndVencimentoAsync(
+            Guid clienteId,
+            DateTime dataVencimentoFinanceiro,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_lancamentos.Any(lancamento =>
+                lancamento.ClienteId == clienteId &&
+                lancamento.DataVencimentoFinanceiro.Date == dataVencimentoFinanceiro.Date &&
+                lancamento.StatusFinanceiro != StatusFinanceiro.Cancelado));
+        }
+
         public Task<LancamentoFinanceiro?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return Task.FromResult(_lancamentos.FirstOrDefault(lancamento => lancamento.Id == id));
@@ -363,7 +449,8 @@ public class BackendQualityTests
 
     private sealed class DashboardRepositoryFake(
         IReadOnlyCollection<TelaCliente>? telas = null,
-        IReadOnlyCollection<LancamentoFinanceiro>? lancamentos = null) : IDashboardRepository
+        IReadOnlyCollection<LancamentoFinanceiro>? lancamentos = null,
+        IReadOnlyCollection<Servidor>? servidores = null) : IDashboardRepository
     {
         public Task<int> CountClientesAsync(CancellationToken cancellationToken)
         {
@@ -378,6 +465,11 @@ public class BackendQualityTests
         public Task<IReadOnlyCollection<LancamentoFinanceiro>> GetLancamentosFinanceirosAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(lancamentos ?? []);
+        }
+
+        public Task<IReadOnlyCollection<Servidor>> GetServidoresAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(servidores ?? []);
         }
 
         public Task<IReadOnlyCollection<AccessManager.Application.Dashboard.DTOs.TelasPorServidorDto>> GetTelasPorServidorAsync(
