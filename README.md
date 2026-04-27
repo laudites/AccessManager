@@ -144,6 +144,46 @@ npm run build
 - Listagem de pendentes e atrasados
 - Dashboard com totais de clientes, telas, vencimentos e valores em aberto
 
+## Proximas melhorias planejadas
+
+As regras abaixo ainda nao estao implementadas no codigo. Elas orientam a proxima etapa de desenvolvimento e devem ser tratadas com ajustes de dominio, DTOs, banco, API e frontend.
+
+### Clientes
+
+- A listagem e o detalhe de clientes devem exibir a quantidade de telas do cliente.
+- A listagem e o detalhe de clientes devem exibir o valor total agrupado das telas do cliente.
+- O valor agrupado deve ser calculado pela soma dos valores acordados das telas ativas do cliente.
+
+### Servidores
+
+- Remover o conceito de limite de clientes.
+- Substituir por quantidade de creditos disponiveis/comprados no servidor.
+- Adicionar valor de custo de cada credito do servidor.
+- Permitir calculo de custo mensal com base nos creditos utilizados ou cadastrados.
+
+### Financeiro
+
+- O lancamento financeiro deve passar a ser feito por cliente.
+- O valor do lancamento deve agrupar o valor das telas ativas do cliente.
+- Se o cliente possui duas ou mais telas, o lancamento financeiro deve considerar a soma dessas telas.
+- `CompetenciaReferencia` nao deve ser preenchida manualmente pelo usuario.
+- `CompetenciaReferencia` pode ser mantida internamente para relatorios mensais, calculada automaticamente a partir de `DataVencimentoFinanceiro`.
+- `DataVencimentoFinanceiro` representa a data acordada com o cliente para pagamento.
+- O sistema deve gerar automaticamente lancamento financeiro pendente 5 dias antes do vencimento financeiro acordado.
+- Pagamento continua manual.
+- Pagamento nao renova tela.
+- Financeiro continua separado do tecnico.
+
+### Dashboard
+
+- Exibir rendimento mensal.
+- Exibir custo mensal.
+- Exibir quantidade de clientes.
+- Exibir quantidade de clientes que ja pagaram no mes.
+- Exibir quantidade de creditos de cada servidor.
+- Exibir quantidade de clientes/telas em cada servidor.
+- Exibir lista de clientes/pessoas pendentes no financeiro.
+
 ## Fora do escopo atual
 
 - Integracoes externas

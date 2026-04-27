@@ -105,6 +105,50 @@ Observacao importante: a pagina de historico existe no frontend, mas a visualiza
 
 ---
 
+## Proximas melhorias planejadas
+
+As regras desta secao ainda nao estao implementadas. Na proxima etapa de codigo, atualizar Domain, Application, Infrastructure, Api, frontend e testes mantendo a separacao entre tecnico e financeiro.
+
+### Clientes
+
+- A aba Clientes deve mostrar quantidade de telas do cliente.
+- A aba Clientes deve mostrar valor total agrupado das telas do cliente.
+- Valor agrupado = soma dos `ValorAcordado` das telas ativas do cliente.
+- Esse valor e informativo para cliente/financeiro e nao deve alterar vencimento tecnico.
+
+### Servidores
+
+- Remover o conceito de `LimiteClientes`.
+- Substituir por quantidade de creditos disponiveis/comprados no servidor.
+- Adicionar valor de custo por credito.
+- Permitir calculo de custo mensal do servidor com base nos creditos utilizados ou cadastrados.
+- Creditos de servidor sao regra operacional/financeira de custo, nao limite tecnico automatico de clientes.
+
+### Financeiro
+
+- Lancamento financeiro deve ser feito por cliente, nao por tela individual como regra principal.
+- O valor do lancamento deve agrupar a soma das telas ativas do cliente.
+- Cliente com duas ou mais telas deve ter lancamento considerando a soma dos valores acordados dessas telas.
+- `CompetenciaReferencia` nao deve ser preenchida manualmente pelo usuario.
+- `CompetenciaReferencia` pode continuar existindo internamente para relatorios mensais, calculada automaticamente a partir de `DataVencimentoFinanceiro`.
+- `DataVencimentoFinanceiro` representa a data acordada com o cliente para pagamento.
+- O sistema deve gerar automaticamente lancamento financeiro pendente 5 dias antes da `DataVencimentoFinanceiro`.
+- Pagamento continua manual.
+- Pagamento nao renova tela.
+- Financeiro continua separado do tecnico.
+
+### Dashboard
+
+- Deve exibir rendimento mensal.
+- Deve exibir custo mensal.
+- Deve exibir quantidade de clientes.
+- Deve exibir quantidade de clientes que ja pagaram no mes.
+- Deve exibir quantidade de creditos de cada servidor.
+- Deve exibir quantidade de clientes/telas em cada servidor.
+- Deve exibir lista de clientes/pessoas pendentes no financeiro.
+
+---
+
 ## Execucao local
 
 Backend:

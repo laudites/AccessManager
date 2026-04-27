@@ -73,6 +73,43 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 
 ---
 
+## Proximas melhorias planejadas
+
+As proximas melhorias abaixo ainda nao estao implementadas. Elas devem evoluir o MVP sem perder o historico das regras atuais.
+
+### Clientes
+
+- Mostrar quantidade de telas por cliente na listagem e no detalhe.
+- Mostrar valor total agrupado das telas do cliente.
+- Calcular valor agrupado pela soma dos valores acordados das telas ativas do cliente.
+
+### Servidores
+
+- Remover o limite de clientes como conceito de dominio.
+- Passar a registrar creditos disponiveis/comprados por servidor.
+- Registrar custo por credito do servidor.
+- Calcular custo mensal com base nos creditos utilizados ou cadastrados.
+
+### Financeiro
+
+- Mudar o lancamento financeiro para uma visao por cliente.
+- Gerar valor do lancamento pela soma das telas ativas do cliente.
+- Manter pagamento manual e separado da renovacao tecnica.
+- Gerar automaticamente lancamento pendente 5 dias antes do vencimento financeiro acordado.
+- Calcular `CompetenciaReferencia` internamente a partir de `DataVencimentoFinanceiro`.
+
+### Dashboard
+
+- Exibir rendimento mensal.
+- Exibir custo mensal.
+- Exibir quantidade total de clientes.
+- Exibir clientes que ja pagaram no mes.
+- Exibir creditos por servidor.
+- Exibir clientes/telas por servidor.
+- Exibir clientes pendentes no financeiro.
+
+---
+
 ## Endpoints principais
 
 - `api/clientes`

@@ -3,39 +3,56 @@
 ## Camadas
 
 ### Domain
+
 - entidades
 - enums
 - regras puras
 
 ### Application
+
 - casos de uso
 - DTOs
 - interfaces
 
 ### Infrastructure
+
 - EF Core
-- repositórios
+- repositorios
 - DbContext
 
 ### Api
+
 - controllers
-- configuração
+- configuracao
 - DI
 
 ---
 
-## Princípios
+## Principios
 
-- Domain não depende de ninguém
+- Domain nao depende de ninguem
 - Application orquestra regras
-- Infrastructure implementa persistência
-- API apenas expõe endpoints
+- Infrastructure implementa persistencia
+- API apenas expoe endpoints
 
 ---
 
-## Boas práticas
+## Boas praticas
 
 - Controllers finos
-- Lógica na Application
-- Entidades sem dependência externa
+- Logica na Application
+- Entidades sem dependencia externa
 - DTOs separados das entidades
+
+---
+
+## Proximas melhorias planejadas
+
+As regras abaixo ainda nao estao implementadas e devem respeitar a Clean Architecture existente.
+
+- Agregacoes de clientes, como quantidade de telas e valor total agrupado, devem ser calculadas na Application a partir de consultas da Infrastructure.
+- Regras de financeiro por cliente devem ficar na Application/Domain, nao nos controllers.
+- Geracao automatica de lancamentos 5 dias antes do vencimento deve ser modelada como caso de uso explicito. Se houver job/agendador no futuro, ele deve apenas acionar caso de uso da Application.
+- Calculo de custo mensal por creditos de servidor deve ficar fora do controller e deve ter DTOs proprios.
+- Mudancas de modelo, como remocao de `LimiteClientes` e adicao de creditos/custo por credito, exigem migration futura.
+- Pagamento manual deve continuar isolado da renovacao tecnica.
