@@ -1,16 +1,17 @@
-
 # AGENTS.md
 
 ## Objetivo
 
-Sistema interno de gestão de clientes e telas de acesso.
+Sistema interno de gestao de clientes e telas de acesso.
+
+O MVP da Fase 1 esta funcional com backend e frontend.
 
 ---
 
-## Stack obrigatória
+## Stack obrigatoria
 
 - Backend: .NET 8 Web API
-- Frontend: React
+- Frontend: React + Vite
 - Banco: MySQL
 - ORM: Entity Framework Core
 
@@ -22,78 +23,162 @@ Sistema interno de gestão de clientes e telas de acesso.
 - SOLID
 - Clean Code
 
+Estrutura real do backend:
+
+- `backend/src/AccessManager.Domain`
+- `backend/src/AccessManager.Application`
+- `backend/src/AccessManager.Infrastructure`
+- `backend/src/AccessManager.Api`
+- `backend/tests/AccessManager.UnitTests`
+
 ---
 
-## Regras de dependência (OBRIGATÓRIO)
+## Regras de dependencia (OBRIGATORIO)
 
-- Domain NÃO depende de ninguém
+- Domain NAO depende de ninguem
 - Application depende apenas de Domain
 - Infrastructure depende de Application e Domain
-- Api depende de Application (e Infrastructure via DI)
+- Api depende de Application e usa Infrastructure apenas via DI
 
-Nunca inverter essas dependências.
+Nunca inverter essas dependencias.
+
+---
+
+## Estado atual da Fase 1
+
+Implementado:
+
+- CRUD de clientes
+- CRUD de servidores
+- CRUD de telas
+- Filtros de telas por cliente e servidor
+- Renovacao tecnica manual
+- Troca manual de servidor
+- Historico persistido para renovacao e troca de servidor
+- CRUD financeiro manual
+- Marcacao manual de pagamento
+- Listagens financeiras de pendentes e atrasados
+- Dashboard com resumo operacional e financeiro
+- Frontend React funcional com paginas de dashboard, clientes, servidores, telas, financeiro e historico
+
+Observacao importante: a pagina de historico existe no frontend, mas a visualizacao dedicada do historico ainda deve ser tratada como melhoria futura caso nao haja endpoint especifico exposto para consulta.
 
 ---
 
 ## Regras principais
 
-- Um cliente pode ter várias telas
-- Cada tela é independente
+- Um cliente pode ter varias telas
+- Cada tela e independente
 - Cada tela possui:
   - servidor
-  - usuário
+  - usuario
   - senha
   - valor acordado
-  - vencimento técnico
+  - vencimento tecnico
   - marca da TV
   - app utilizado
   - MAC/ID opcional
-  - chave secundária opcional
+  - chave secundaria opcional
 
 ---
 
-## Regras técnicas
+## Regras tecnicas
 
-- Renovação é manual
-- Troca de servidor é manual
-- Alterações devem gerar histórico
+- Renovacao e manual
+- Troca de servidor e manual
+- Renovacao altera o vencimento tecnico e pode alterar o valor acordado
+- Troca de servidor altera apenas o servidor da tela
+- Renovacao e troca de servidor devem gerar historico
+- Pagamento financeiro nao altera vencimento tecnico
 
 ---
 
 ## Regras financeiras
 
-- Financeiro é separado do técnico
-- Pagamento não renova automaticamente
-- Lançamentos são manuais
-- Pode haver dívida mesmo com tela ativa
+- Financeiro e separado do tecnico
+- Pagamento nao renova automaticamente
+- Lancamentos sao manuais
+- Pode haver divida mesmo com tela ativa
+- Lancamento financeiro pertence a um cliente e a uma tela
+- A tela informada no lancamento deve pertencer ao cliente informado
+- Valor financeiro deve ser maior que zero
+
+---
+
+## Execucao local
+
+Backend:
+
+```powershell
+dotnet restore backend/AccessManager.sln
+dotnet ef database update --project backend/src/AccessManager.Infrastructure --startup-project backend/src/AccessManager.Api
+dotnet run --project backend/src/AccessManager.Api/AccessManager.Api.csproj --launch-profile http
+```
+
+Frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+URLs padrao:
+
+- API: `http://localhost:5025`
+- Frontend: `http://localhost:5173`
+
+---
+
+## Build obrigatorio antes de concluir mudancas de codigo
+
+Backend:
+
+```powershell
+dotnet build backend/AccessManager.sln
+dotnet test backend/AccessManager.sln
+```
+
+Frontend:
+
+```powershell
+cd frontend
+npm run build
+```
+
+Para mudancas apenas em documentacao, build pode ser dispensado se nada de codigo foi alterado.
 
 ---
 
 ## Fora do escopo
 
-- integrações externas
-- automações
-- notificações
-- cobrança automática
+- integracoes externas
+- automacoes
+- notificacoes
+- cobranca automatica
+- renovacao automatica por pagamento
 
 ---
 
-## Boas práticas
+## Boas praticas
 
-- mudanças pequenas
-- sempre garantir build
-- evitar complexidade desnecessária
-- não adicionar dependências sem necessidade
+- mudancas pequenas
+- sempre garantir build quando houver codigo
+- evitar complexidade desnecessaria
+- nao adicionar dependencias sem necessidade
 - controllers devem ser finos
 - regras devem ficar na Application/Domain
+- manter DTOs separados das entidades
+- manter respostas consistentes pelo envelope atual da API
+- nao misturar regras financeiras com regras tecnicas
 
 ---
 
-## Ordem de execução
+## Ordem de evolucao recomendada
 
-1. Backend
-2. Entidades
-3. Banco (EF Core + MySQL)
-4. CRUDs
-5. Regras de negócio
+1. Ajustes de backend e regras
+2. Entidades e DTOs
+3. Banco, migrations e repositorios
+4. Endpoints
+5. Testes
 6. Frontend
