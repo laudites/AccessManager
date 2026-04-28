@@ -13,16 +13,10 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
         var hoje = DateTime.UtcNow.Date;
         var limiteVencendo = hoje.AddDays(3);
 
-        var totalClientesTask = dashboardRepository.CountClientesAsync(cancellationToken);
-        var telasTask = dashboardRepository.GetTelasAsync(cancellationToken);
-        var servidoresTask = dashboardRepository.GetServidoresAsync(cancellationToken);
-        var lancamentosTask = dashboardRepository.GetLancamentosFinanceirosAsync(cancellationToken);
-
-        await Task.WhenAll(totalClientesTask, telasTask, servidoresTask, lancamentosTask);
-
-        var telas = telasTask.Result;
-        var servidores = servidoresTask.Result;
-        var lancamentos = lancamentosTask.Result;
+        var totalClientes = await dashboardRepository.CountClientesAsync(cancellationToken);
+        var telas = await dashboardRepository.GetTelasAsync(cancellationToken);
+        var servidores = await dashboardRepository.GetServidoresAsync(cancellationToken);
+        var lancamentos = await dashboardRepository.GetLancamentosFinanceirosAsync(cancellationToken);
         var primeiroDiaMes = new DateTime(hoje.Year, hoje.Month, 1);
         var primeiroDiaProximoMes = primeiroDiaMes.AddMonths(1);
 
@@ -36,7 +30,7 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
                 .Sum(lancamento => lancamento.Valor),
             CustoMensal = servidores.Sum(servidor =>
                 telas.Count(tela => tela.Ativo && tela.ServidorId == servidor.Id) * servidor.ValorCustoCredito),
-            TotalClientes = totalClientesTask.Result,
+            TotalClientes = totalClientes,
             TotalClientesPagosMes = lancamentos
                 .Where(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pago &&
                     lancamento.DataPagamento is not null &&

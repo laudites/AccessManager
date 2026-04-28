@@ -252,6 +252,16 @@ public class BackendQualityTests
         Assert.Equal(14, result.Data.CustoMensal);
     }
 
+    [Fact]
+    public async Task Dashboard_NaoDeveExecutarConsultasEmParaleloNoMesmoRepositorio()
+    {
+        var service = new DashboardService(new DashboardRepositoryConcurrencyFake());
+
+        var result = await service.GetResumoAsync(CancellationToken.None);
+
+        Assert.True(result.Success);
+    }
+
     private sealed class ClienteRepositoryFake(params Cliente[] clientes) : IClienteRepository
     {
         private readonly List<Cliente> _clientes = [.. clientes];
@@ -476,6 +486,59 @@ public class BackendQualityTests
             CancellationToken cancellationToken)
         {
             return Task.FromResult<IReadOnlyCollection<AccessManager.Application.Dashboard.DTOs.TelasPorServidorDto>>([]);
+        }
+    }
+
+    private sealed class DashboardRepositoryConcurrencyFake : IDashboardRepository
+    {
+        private int _activeOperations;
+
+        public async Task<int> CountClientesAsync(CancellationToken cancellationToken)
+        {
+            await SimulateDbContextOperationAsync(cancellationToken);
+            return 0;
+        }
+
+        public async Task<IReadOnlyCollection<TelaCliente>> GetTelasAsync(CancellationToken cancellationToken)
+        {
+            await SimulateDbContextOperationAsync(cancellationToken);
+            return [];
+        }
+
+        public async Task<IReadOnlyCollection<Servidor>> GetServidoresAsync(CancellationToken cancellationToken)
+        {
+            await SimulateDbContextOperationAsync(cancellationToken);
+            return [];
+        }
+
+        public async Task<IReadOnlyCollection<LancamentoFinanceiro>> GetLancamentosFinanceirosAsync(
+            CancellationToken cancellationToken)
+        {
+            await SimulateDbContextOperationAsync(cancellationToken);
+            return [];
+        }
+
+        public Task<IReadOnlyCollection<AccessManager.Application.Dashboard.DTOs.TelasPorServidorDto>> GetTelasPorServidorAsync(
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult<IReadOnlyCollection<AccessManager.Application.Dashboard.DTOs.TelasPorServidorDto>>([]);
+        }
+
+        private async Task SimulateDbContextOperationAsync(CancellationToken cancellationToken)
+        {
+            if (Interlocked.Increment(ref _activeOperations) != 1)
+            {
+                throw new InvalidOperationException("Operacoes concorrentes no mesmo repositorio.");
+            }
+
+            try
+            {
+                await Task.Delay(10, cancellationToken);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _activeOperations);
+            }
         }
     }
 }
