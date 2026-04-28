@@ -11,6 +11,8 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - Quantidade de telas na listagem e no detalhe de clientes.
 - Valor total agrupado das telas ativas do cliente.
 - Calculo pela soma de `ValorAcordado` das telas ativas.
+- Status financeiro do cliente no mes atual.
+- Prioridade do status financeiro: Atrasado, Pendente, Pago e Sem lançamento.
 - DTOs, services, repositories, endpoints, frontend e testes atualizados.
 
 ### Implementado: Servidores
@@ -27,6 +29,8 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - `CompetenciaReferencia` calculada automaticamente pelo backend a partir de `DataVencimentoFinanceiro`.
 - `DataVencimentoFinanceiro` usada como data acordada com o cliente.
 - Endpoint/manual service para gerar lancamento pendente 5 dias antes do vencimento acordado.
+- BackgroundService na API para executar a geracao real de pendencias automaticamente todos os dias.
+- Filtro por mes/ano na listagem financeira, considerando `DataVencimentoFinanceiro`.
 - Pagamento manual mantido.
 - Pagamento nao renova tela.
 - Financeiro continua separado do tecnico.
@@ -41,10 +45,11 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - Quantidade de clientes/telas em cada servidor.
 - Lista de clientes/pessoas pendentes no financeiro.
 
-### Futuro: geracao automatica real
+### Implementado: geracao automatica real
 
-- Criar job/background service real para gerar pendencias 5 dias antes do vencimento acordado.
-- Manter endpoint/manual service atual como base para futuro scheduler.
+- BackgroundService real criado na API para gerar pendencias 5 dias antes do vencimento acordado.
+- Endpoint/manual service mantido para execucao manual.
+- Regra de duplicidade mantida por cliente e vencimento financeiro.
 
 ### Historico tecnico
 

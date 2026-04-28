@@ -29,9 +29,11 @@ GET /api/clientes/{id}
 ## Contratos atuais
 
 - Endpoints de clientes retornam agregados de quantidade de telas e valor total das telas ativas.
+- Endpoints de clientes retornam o status financeiro do cliente no mes atual: `Atrasado`, `Pendente`, `Pago` ou `Sem lançamento`.
 - Endpoints de servidores usam creditos disponiveis/comprados e custo por credito.
 - Endpoints financeiros expoem criacao/consulta por cliente, com valor agrupado das telas ativas.
 - `CompetenciaReferencia` nao e campo de entrada do usuario nos DTOs publicos.
 - `DataVencimentoFinanceiro` deve ser campo de entrada para representar a data acordada de pagamento.
-- A geracao de lancamento pendente 5 dias antes do vencimento possui endpoint manual em `POST /api/lancamentos-financeiros/gerar-pendentes`.
+- A listagem de lancamentos financeiros aceita filtros opcionais por `mes` e `ano`, considerando `DataVencimentoFinanceiro`.
+- A geracao de lancamento pendente 5 dias antes do vencimento possui endpoint manual em `POST /api/lancamentos-financeiros/gerar-pendentes` e tambem e executada automaticamente por BackgroundService da API.
 - Dashboard expoe dados agregados para rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor, clientes/telas por servidor e pendencias financeiras por cliente.

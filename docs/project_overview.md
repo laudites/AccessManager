@@ -57,10 +57,12 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Persistencia de historico para renovacao e troca de servidor
 - Lancamentos financeiros por cliente com valor agrupado das telas ativas
 - Competencia financeira calculada automaticamente pelo backend
+- Filtro de lancamentos financeiros por mes e ano de vencimento
+- Status financeiro calculado por cliente no mes atual
 - Marcacao manual de pagamento
 - Consulta de lancamentos pendentes
 - Consulta de lancamentos atrasados
-- Endpoint/manual service para gerar pendentes 5 dias antes do vencimento acordado
+- Endpoint/manual service e BackgroundService para gerar pendentes 5 dias antes do vencimento acordado
 - Dashboard com resumo financeiro, rendimento mensal, custo mensal, creditos e telas por servidor
 - Testes unitarios de regras centrais e smoke tests de arquitetura
 
@@ -84,6 +86,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Mostrar quantidade de telas por cliente na listagem e no detalhe.
 - Mostrar valor total agrupado das telas do cliente.
 - Calcular valor agrupado pela soma dos valores acordados das telas ativas do cliente.
+- Mostrar status financeiro do cliente no mes atual com prioridade Atrasado, Pendente, Pago e Sem lançamento.
 
 ### Servidores
 
@@ -99,6 +102,8 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Manter pagamento manual e separado da renovacao tecnica.
 - Gerar automaticamente lancamento pendente 5 dias antes do vencimento financeiro acordado.
 - Calcular `CompetenciaReferencia` internamente a partir de `DataVencimentoFinanceiro`.
+- Filtrar listagem por mes/ano usando `DataVencimentoFinanceiro`.
+- Executar geracao automatica diaria de pendencias por BackgroundService da API, mantendo o endpoint manual.
 
 ### Dashboard
 
@@ -114,7 +119,6 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 
 ## Proximas melhorias planejadas
 
-- Criar job/background service real para gerar pendencias automaticamente 5 dias antes do vencimento.
 - Expor visualizacao completa e filtravel do historico tecnico.
 
 ---
@@ -127,6 +131,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - `api/telas/{id}/renovar`
 - `api/telas/{id}/trocar-servidor`
 - `api/lancamentos-financeiros`
+- `api/lancamentos-financeiros?mes={mes}&ano={ano}`
 - `api/lancamentos-financeiros/{id}/marcar-pago`
 - `api/lancamentos-financeiros/pendentes`
 - `api/lancamentos-financeiros/atrasados`

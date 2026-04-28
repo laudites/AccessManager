@@ -23,7 +23,9 @@ Observacoes praticas:
 
 - DTOs de listagem/detalhe de cliente incluem quantidade de telas.
 - DTOs de listagem/detalhe de cliente incluem valor total agrupado das telas ativas.
+- DTOs de listagem/detalhe de cliente incluem status financeiro calculado para o mes atual.
 - Esses campos podem ser calculados por consulta/projecao e nao precisam necessariamente ser persistidos na tabela `Cliente`.
+- O status financeiro do cliente usa a prioridade: `Atrasado` > `Pendente` > `Pago` > `Sem lançamento`.
 
 ---
 
@@ -44,7 +46,7 @@ Observacoes praticas:
 
 - `QuantidadeCreditos` nao pode ser negativo.
 - `ValorCustoCredito` nao pode ser negativo.
-- `LimiteClientes` foi substituido por `QuantidadeCreditos` na migration `ServerCreditsAndClientFinance` e nao e mais regra funcional.
+- `LimiteClientes` foi substituido por `QuantidadeCreditos` na migration `ServerCreditsAndClientFinance` e nao deve ser usado como regra funcional.
 - O status do servidor e independente do status das telas.
 - A troca de servidor de uma tela nao altera automaticamente dados financeiros.
 - O custo mensal estimado pode ser calculado com base nos creditos utilizados/cadastrados.
@@ -128,7 +130,9 @@ Observacoes praticas:
 - Marcar como pago define `StatusFinanceiro = Pago` e preenche `DataPagamento`.
 - Pagamento nao altera a tela, nao renova vencimento tecnico e nao cria historico tecnico.
 - `DataVencimentoFinanceiro` representa a data acordada com o cliente.
-- Existe mecanismo manual/endpoint para gerar lancamento pendente 5 dias antes do vencimento financeiro acordado.
+- A listagem financeira pode ser filtrada por mes e ano usando `DataVencimentoFinanceiro`.
+- Existe mecanismo manual/endpoint e BackgroundService para gerar lancamento pendente 5 dias antes do vencimento financeiro acordado.
+- A geracao automatica usa `DiaPagamentoPreferido` do cliente para calcular o vencimento financeiro alvo.
 
 ---
 

@@ -1,3 +1,4 @@
+using AccessManager.Api.BackgroundServices;
 using AccessManager.Infrastructure;
 using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Clientes.Services;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IServidorService, ServidorService>();
 builder.Services.AddScoped<ITelaClienteService, TelaClienteService>();
 builder.Services.AddScoped<ILancamentoFinanceiroService, LancamentoFinanceiroService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddHostedService<GerarLancamentosFinanceirosPendentesBackgroundService>();
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty);
 

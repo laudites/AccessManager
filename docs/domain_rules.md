@@ -13,6 +13,10 @@
 - A listagem e o detalhe de clientes devem exibir valor total agrupado das telas do cliente.
 - Valor total agrupado = soma de `ValorAcordado` das telas ativas do cliente.
 - Telas inativas nao compoem o valor agrupado.
+- A listagem e o detalhe de clientes devem exibir status financeiro do mes atual.
+- Status financeiro do cliente considera lancamentos do cliente no mes/ano atual pela `DataVencimentoFinanceiro`.
+- Prioridade do status financeiro do cliente: `Atrasado` > `Pendente` > `Pago` > `Sem lançamento`.
+- `Atrasado` tambem cobre lancamento sem pagamento, nao pago/cancelado, com vencimento financeiro anterior a hoje.
 
 ---
 
@@ -109,6 +113,7 @@ Regras implementadas:
 - `TelaClienteId` e opcional
 - valor do lancamento e calculado pela soma dos valores acordados das telas ativas do cliente
 - `CompetenciaReferencia` e calculada automaticamente pelo backend com base em `DataVencimentoFinanceiro`
+- listagem de lancamentos permite filtro opcional por mes e ano, considerando `DataVencimentoFinanceiro`
 - vencimento financeiro e obrigatorio
 - status financeiro deve ser valido
 - ao criar lancamento sem status, o status padrao e `Pendente`
@@ -118,8 +123,10 @@ Regras implementadas:
 ### Geracao de pendentes
 
 - Existe endpoint/manual service para gerar lancamentos pendentes de clientes elegiveis 5 dias antes do vencimento acordado.
-- Ainda nao existe job/background service agendado.
+- Existe BackgroundService na API para executar a mesma geracao automaticamente todos os dias.
 - A geracao evita duplicar lancamento para o mesmo cliente e vencimento.
+- A geracao usa `DiaPagamentoPreferido` para identificar clientes cujo vencimento financeiro ocorre em 5 dias.
+- Lancamentos gerados automaticamente iniciam como `Pendente`.
 
 ---
 
