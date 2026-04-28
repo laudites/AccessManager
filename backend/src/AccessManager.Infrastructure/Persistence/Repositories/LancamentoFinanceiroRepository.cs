@@ -11,6 +11,8 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
         Guid? clienteId,
         Guid? telaClienteId,
         StatusFinanceiro? statusFinanceiro,
+        int? mes,
+        int? ano,
         CancellationToken cancellationToken)
     {
         IQueryable<LancamentoFinanceiro> query = dbContext.LancamentosFinanceiros
@@ -31,6 +33,16 @@ public class LancamentoFinanceiroRepository(AccessManagerDbContext dbContext) : 
         if (statusFinanceiro is not null)
         {
             query = query.Where(lancamento => lancamento.StatusFinanceiro == statusFinanceiro.Value);
+        }
+
+        if (mes is not null)
+        {
+            query = query.Where(lancamento => lancamento.DataVencimentoFinanceiro.Month == mes.Value);
+        }
+
+        if (ano is not null)
+        {
+            query = query.Where(lancamento => lancamento.DataVencimentoFinanceiro.Year == ano.Value);
         }
 
         return await query

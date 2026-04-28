@@ -9,6 +9,8 @@ public interface ILancamentoFinanceiroRepository
         Guid? clienteId,
         Guid? telaClienteId,
         StatusFinanceiro? statusFinanceiro,
+        int? mes,
+        int? ano,
         CancellationToken cancellationToken);
 
     Task<IReadOnlyCollection<LancamentoFinanceiro>> GetPendentesAsync(CancellationToken cancellationToken);

@@ -11,4 +11,5 @@ public class ClienteDto
     public bool Ativo { get; set; }
     public int QuantidadeTelas { get; set; }
     public decimal ValorTotalTelas { get; set; }
+    public string StatusFinanceiroCliente { get; set; } = string.Empty;
 }

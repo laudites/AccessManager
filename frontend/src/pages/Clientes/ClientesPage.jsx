@@ -22,6 +22,13 @@ const emptyForm = {
   ativo: true,
 }
 
+const financeiroStatusOptions = {
+  Pago: { label: 'Pago', badge: 'text-bg-success' },
+  Pendente: { label: 'Pendente', badge: 'text-bg-warning' },
+  Atrasado: { label: 'Atrasado', badge: 'text-bg-danger' },
+  'Sem lançamento': { label: 'Sem lançamento', badge: 'text-bg-secondary' },
+}
+
 function toFormData(cliente) {
   return {
     nome: cliente?.nome ?? '',
@@ -72,6 +79,10 @@ function formatDate(value) {
   }
 
   return new Intl.DateTimeFormat('pt-BR').format(new Date(value))
+}
+
+function getFinanceiroStatusOption(status) {
+  return financeiroStatusOptions[status] ?? financeiroStatusOptions['Sem lançamento']
 }
 
 function ClientesPage() {
@@ -242,47 +253,57 @@ function ClientesPage() {
                     <th>Dia pagamento</th>
                     <th className="text-end">Telas</th>
                     <th className="text-end">Valor telas</th>
-                    <th>Status</th>
+                    <th>Financeiro</th>
+                    <th>Cadastro</th>
                     <th className="text-end">Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="7">
+                      <td className="text-muted text-center" colSpan="8">
                         Carregando clientes...
                       </td>
                     </tr>
                   ) : sortedClientes.length === 0 ? (
                     <tr>
-                      <td className="text-muted text-center" colSpan="7">
+                      <td className="text-muted text-center" colSpan="8">
                         Nenhum cliente encontrado.
                       </td>
                     </tr>
                   ) : (
-                    sortedClientes.map((cliente) => (
-                      <tr key={cliente.id}>
-                        <td>{cliente.nome}</td>
-                        <td>{cliente.telefone || '-'}</td>
-                        <td>{cliente.diaPagamentoPreferido ?? '-'}</td>
-                        <td className="text-end">{cliente.quantidadeTelas ?? 0}</td>
-                        <td className="text-end">{currencyFormatter.format(cliente.valorTotalTelas ?? 0)}</td>
-                        <td>
-                          <span className={`badge ${cliente.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
-                            {cliente.ativo ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </td>
-                        <td className="text-end">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            type="button"
-                            onClick={() => handleViewCliente(cliente.id)}
-                          >
-                            Ver
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    sortedClientes.map((cliente) => {
+                      const financeiroStatus = getFinanceiroStatusOption(cliente.statusFinanceiroCliente)
+
+                      return (
+                        <tr key={cliente.id}>
+                          <td>{cliente.nome}</td>
+                          <td>{cliente.telefone || '-'}</td>
+                          <td>{cliente.diaPagamentoPreferido ?? '-'}</td>
+                          <td className="text-end">{cliente.quantidadeTelas ?? 0}</td>
+                          <td className="text-end">{currencyFormatter.format(cliente.valorTotalTelas ?? 0)}</td>
+                          <td>
+                            <span className={`badge ${financeiroStatus.badge}`}>
+                              {financeiroStatus.label}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge ${cliente.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                              {cliente.ativo ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </td>
+                          <td className="text-end">
+                            <button
+                              className="btn btn-sm btn-outline-primary"
+                              type="button"
+                              onClick={() => handleViewCliente(cliente.id)}
+                            >
+                              Ver
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })
                   )}
                 </tbody>
               </table>
@@ -320,6 +341,8 @@ function ClientesPage() {
                     <dd className="col-sm-7">{selectedCliente.quantidadeTelas ?? 0}</dd>
                     <dt className="col-sm-5">Valor total telas</dt>
                     <dd className="col-sm-7">{currencyFormatter.format(selectedCliente.valorTotalTelas ?? 0)}</dd>
+                    <dt className="col-sm-5">Financeiro no mes</dt>
+                    <dd className="col-sm-7">{selectedCliente.statusFinanceiroCliente ?? 'Sem lançamento'}</dd>
                     <dt className="col-sm-5">Identificador</dt>
                     <dd className="col-sm-7 text-break">{selectedCliente.id}</dd>
                   </dl>

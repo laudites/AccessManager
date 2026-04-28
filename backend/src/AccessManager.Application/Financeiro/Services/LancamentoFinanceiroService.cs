@@ -62,6 +62,8 @@ public class LancamentoFinanceiroService(
         Guid? clienteId,
         Guid? telaClienteId,
         StatusFinanceiro? statusFinanceiro,
+        int? mes,
+        int? ano,
         CancellationToken cancellationToken)
     {
         if (statusFinanceiro is not null && !Enum.IsDefined(statusFinanceiro.Value))
@@ -69,10 +71,18 @@ public class LancamentoFinanceiroService(
             return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Fail("StatusFinanceiro deve ser valido.");
         }
 
+        var filtroPeriodoErrors = ValidateFiltroPeriodo(mes, ano);
+        if (filtroPeriodoErrors.Count > 0)
+        {
+            return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Fail(filtroPeriodoErrors.ToArray());
+        }
+
         var lancamentos = await lancamentoFinanceiroRepository.GetAllAsync(
             clienteId,
             telaClienteId,
             statusFinanceiro,
+            mes,
+            ano,
             cancellationToken);
 
         return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Ok(lancamentos.Select(MapToDto).ToArray());
@@ -269,6 +279,23 @@ public class LancamentoFinanceiroService(
         if (statusFinanceiro is not null && !Enum.IsDefined(statusFinanceiro.Value))
         {
             errors.Add("StatusFinanceiro deve ser valido.");
+        }
+
+        return errors;
+    }
+
+    private static List<string> ValidateFiltroPeriodo(int? mes, int? ano)
+    {
+        var errors = new List<string>();
+
+        if (mes is not null and (< 1 or > 12))
+        {
+            errors.Add("Mes deve estar entre 1 e 12.");
+        }
+
+        if (ano is not null and < 1)
+        {
+            errors.Add("Ano deve ser maior que zero.");
         }
 
         return errors;

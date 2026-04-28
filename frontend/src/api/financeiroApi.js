@@ -8,6 +8,8 @@ export async function getLancamentosFinanceiros(filters = {}) {
         clienteId: filters.clienteId || undefined,
         telaClienteId: filters.telaClienteId || undefined,
         statusFinanceiro: filters.statusFinanceiro || undefined,
+        mes: filters.mes || undefined,
+        ano: filters.ano || undefined,
       },
     })
 

@@ -2,6 +2,7 @@ using AccessManager.Application.Clientes.DTOs;
 using AccessManager.Application.Clientes.Interfaces;
 using AccessManager.Application.Common;
 using AccessManager.Domain.Entities;
+using AccessManager.Domain.Enums;
 
 namespace AccessManager.Application.Clientes.Services;
 
@@ -110,6 +111,10 @@ public class ClienteService(IClienteRepository clienteRepository) : IClienteServ
 
     private static ClienteDto MapToDto(Cliente cliente)
     {
+        var hoje = DateTime.UtcNow.Date;
+        var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
+        var inicioProximoMes = inicioMes.AddMonths(1);
+
         return new ClienteDto
         {
             Id = cliente.Id,
@@ -122,8 +127,53 @@ public class ClienteService(IClienteRepository clienteRepository) : IClienteServ
             QuantidadeTelas = cliente.Telas.Count(tela => tela.Ativo),
             ValorTotalTelas = cliente.Telas
                 .Where(tela => tela.Ativo)
-                .Sum(tela => tela.ValorAcordado)
+                .Sum(tela => tela.ValorAcordado),
+            StatusFinanceiroCliente = CalculateStatusFinanceiroCliente(cliente, inicioMes, inicioProximoMes, hoje)
         };
+    }
+
+    private static string CalculateStatusFinanceiroCliente(
+        Cliente cliente,
+        DateTime inicioMes,
+        DateTime inicioProximoMes,
+        DateTime hoje)
+    {
+        var lancamentosPeriodo = cliente.LancamentosFinanceiros
+            .Where(lancamento =>
+                lancamento.DataVencimentoFinanceiro.Date >= inicioMes &&
+                lancamento.DataVencimentoFinanceiro.Date < inicioProximoMes)
+            .ToArray();
+
+        if (lancamentosPeriodo.Length == 0)
+        {
+            return "Sem lançamento";
+        }
+
+        if (lancamentosPeriodo.Any(lancamento => IsAtrasado(lancamento, hoje)))
+        {
+            return "Atrasado";
+        }
+
+        if (lancamentosPeriodo.Any(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pendente))
+        {
+            return "Pendente";
+        }
+
+        if (lancamentosPeriodo.Any(lancamento => lancamento.StatusFinanceiro == StatusFinanceiro.Pago))
+        {
+            return "Pago";
+        }
+
+        return "Sem lançamento";
+    }
+
+    private static bool IsAtrasado(LancamentoFinanceiro lancamento, DateTime hoje)
+    {
+        return lancamento.StatusFinanceiro == StatusFinanceiro.Atrasado ||
+            (lancamento.DataPagamento is null &&
+                lancamento.StatusFinanceiro != StatusFinanceiro.Pago &&
+                lancamento.StatusFinanceiro != StatusFinanceiro.Cancelado &&
+                lancamento.DataVencimentoFinanceiro.Date < hoje);
     }
 
     private static string? NormalizeOptionalText(string? value)

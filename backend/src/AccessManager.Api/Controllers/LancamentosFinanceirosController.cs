@@ -32,12 +32,16 @@ public class LancamentosFinanceirosController(ILancamentoFinanceiroService lanca
         [FromQuery] Guid? clienteId,
         [FromQuery] Guid? telaClienteId,
         [FromQuery] StatusFinanceiro? statusFinanceiro,
+        [FromQuery] int? mes,
+        [FromQuery] int? ano,
         CancellationToken cancellationToken)
     {
         var result = await lancamentoFinanceiroService.GetAllAsync(
             clienteId,
             telaClienteId,
             statusFinanceiro,
+            mes,
+            ano,
             cancellationToken);
 
         if (!result.Success)

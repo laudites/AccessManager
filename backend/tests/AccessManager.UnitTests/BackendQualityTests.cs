@@ -218,6 +218,96 @@ public class BackendQualityTests
     }
 
     [Fact]
+    public async Task Cliente_DeveRetornarStatusFinanceiroDoMesAtualComPrioridade()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nome = "Cliente",
+            LancamentosFinanceiros =
+            [
+                new LancamentoFinanceiro
+                {
+                    Id = Guid.NewGuid(),
+                    StatusFinanceiro = StatusFinanceiro.Pago,
+                    DataPagamento = hoje,
+                    DataVencimentoFinanceiro = hoje
+                },
+                new LancamentoFinanceiro
+                {
+                    Id = Guid.NewGuid(),
+                    StatusFinanceiro = StatusFinanceiro.Pendente,
+                    DataVencimentoFinanceiro = hoje.AddDays(-1)
+                }
+            ]
+        };
+        var service = new ClienteService(new ClienteRepositoryFake(cliente));
+
+        var result = await service.GetByIdAsync(cliente.Id, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal("Atrasado", result.Data!.StatusFinanceiroCliente);
+    }
+
+    [Fact]
+    public async Task Cliente_SemLancamentoNoMesAtual_DeveRetornarSemLancamento()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nome = "Cliente",
+            LancamentosFinanceiros =
+            [
+                new LancamentoFinanceiro
+                {
+                    Id = Guid.NewGuid(),
+                    StatusFinanceiro = StatusFinanceiro.Pago,
+                    DataPagamento = hoje.AddMonths(-1),
+                    DataVencimentoFinanceiro = hoje.AddMonths(-1)
+                }
+            ]
+        };
+        var service = new ClienteService(new ClienteRepositoryFake(cliente));
+
+        var result = await service.GetByIdAsync(cliente.Id, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal("Sem lançamento", result.Data!.StatusFinanceiroCliente);
+    }
+
+    [Fact]
+    public async Task Financeiro_DeveFiltrarLancamentosPorMesEAnoDoVencimento()
+    {
+        var clienteId = Guid.NewGuid();
+        var repository = new LancamentoFinanceiroRepositoryFake(
+            new LancamentoFinanceiro
+            {
+                Id = Guid.NewGuid(),
+                ClienteId = clienteId,
+                DataVencimentoFinanceiro = new DateTime(2026, 4, 10),
+                StatusFinanceiro = StatusFinanceiro.Pendente
+            },
+            new LancamentoFinanceiro
+            {
+                Id = Guid.NewGuid(),
+                ClienteId = clienteId,
+                DataVencimentoFinanceiro = new DateTime(2026, 5, 10),
+                StatusFinanceiro = StatusFinanceiro.Pendente
+            });
+        var service = new LancamentoFinanceiroService(
+            repository,
+            new ClienteRepositoryFake(new Cliente { Id = clienteId, Nome = "Cliente" }));
+
+        var result = await service.GetAllAsync(null, null, null, 4, 2026, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Single(result.Data!);
+        Assert.Equal(new DateTime(2026, 4, 10), result.Data!.Single().DataVencimentoFinanceiro);
+    }
+
+    [Fact]
     public async Task Dashboard_DeveCalcularRendimentoMensalECustoMensal()
     {
         var hoje = DateTime.UtcNow.Date;
@@ -403,9 +493,38 @@ public class BackendQualityTests
             Guid? clienteId,
             Guid? telaClienteId,
             StatusFinanceiro? statusFinanceiro,
+            int? mes,
+            int? ano,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyCollection<LancamentoFinanceiro>>(_lancamentos);
+            IEnumerable<LancamentoFinanceiro> query = _lancamentos;
+
+            if (clienteId is not null)
+            {
+                query = query.Where(lancamento => lancamento.ClienteId == clienteId.Value);
+            }
+
+            if (telaClienteId is not null)
+            {
+                query = query.Where(lancamento => lancamento.TelaClienteId == telaClienteId.Value);
+            }
+
+            if (statusFinanceiro is not null)
+            {
+                query = query.Where(lancamento => lancamento.StatusFinanceiro == statusFinanceiro.Value);
+            }
+
+            if (mes is not null)
+            {
+                query = query.Where(lancamento => lancamento.DataVencimentoFinanceiro.Month == mes.Value);
+            }
+
+            if (ano is not null)
+            {
+                query = query.Where(lancamento => lancamento.DataVencimentoFinanceiro.Year == ano.Value);
+            }
+
+            return Task.FromResult<IReadOnlyCollection<LancamentoFinanceiro>>(query.ToArray());
         }
 
         public Task<IReadOnlyCollection<LancamentoFinanceiro>> GetPendentesAsync(CancellationToken cancellationToken)

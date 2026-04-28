@@ -14,6 +14,8 @@ public interface ILancamentoFinanceiroService
         Guid? clienteId,
         Guid? telaClienteId,
         StatusFinanceiro? statusFinanceiro,
+        int? mes,
+        int? ano,
         CancellationToken cancellationToken);
 
     Task<OperationResult<LancamentoFinanceiroDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
