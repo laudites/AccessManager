@@ -360,23 +360,34 @@ public class BackendQualityTests
     }
 
     [Fact]
-    public async Task Financeiro_GeracaoPendentes_DeveGerarCincoDiasAntesComValorAgrupado()
+    public async Task Financeiro_GeracaoPendentes_DeveGerarQuandoFaltamMenosDeCincoDias()
+    {
+        var clienteId = Guid.NewGuid();
+        var cliente = CreateClienteParaGeracaoPendente(clienteId, diaPagamentoPreferido: 1);
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(),
+            new ClienteRepositoryFake(cliente));
+
+        var result = await service.GerarPendentesAsync(
+            new GerarLancamentosFinanceirosRequest { DataReferencia = new DateTime(2026, 4, 29) },
+            CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamento = Assert.Single(result.Data!);
+        Assert.Equal(clienteId, lancamento.ClienteId);
+        Assert.Equal(new DateTime(2026, 5, 1), lancamento.DataVencimentoFinanceiro);
+        Assert.Equal(new DateTime(2026, 5, 1), lancamento.CompetenciaReferencia);
+        Assert.Equal(StatusFinanceiro.Pendente, lancamento.StatusFinanceiro);
+        Assert.Equal(100, lancamento.Valor);
+        Assert.Null(lancamento.TelaClienteId);
+    }
+
+    [Fact]
+    public async Task Financeiro_GeracaoPendentes_DeveGerarQuandoFaltamExatamenteCincoDiasComValorAgrupado()
     {
         var clienteId = Guid.NewGuid();
         var dataReferencia = new DateTime(2026, 4, 25);
-        var cliente = new Cliente
-        {
-            Id = clienteId,
-            Nome = "Cliente",
-            Ativo = true,
-            DiaPagamentoPreferido = 30,
-            Telas =
-            [
-                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 45, Ativo = true },
-                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 55, Ativo = true },
-                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 90, Ativo = false }
-            ]
-        };
+        var cliente = CreateClienteParaGeracaoPendente(clienteId, diaPagamentoPreferido: 30);
         var service = new LancamentoFinanceiroService(
             new LancamentoFinanceiroRepositoryFake(),
             new ClienteRepositoryFake(cliente));
@@ -393,6 +404,40 @@ public class BackendQualityTests
         Assert.Equal(StatusFinanceiro.Pendente, lancamento.StatusFinanceiro);
         Assert.Equal(100, lancamento.Valor);
         Assert.Null(lancamento.TelaClienteId);
+    }
+
+    [Fact]
+    public async Task Financeiro_GeracaoPendentes_NaoDeveGerarQuandoFaltamMaisDeCincoDias()
+    {
+        var cliente = CreateClienteParaGeracaoPendente(Guid.NewGuid(), diaPagamentoPreferido: 30);
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(),
+            new ClienteRepositoryFake(cliente));
+
+        var result = await service.GerarPendentesAsync(
+            new GerarLancamentosFinanceirosRequest { DataReferencia = new DateTime(2026, 4, 24) },
+            CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Empty(result.Data!);
+    }
+
+    [Fact]
+    public async Task Financeiro_GeracaoPendentes_DeveUsarProximoMesQuandoDiaPreferidoJaPassou()
+    {
+        var clienteId = Guid.NewGuid();
+        var cliente = CreateClienteParaGeracaoPendente(clienteId, diaPagamentoPreferido: 1);
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(),
+            new ClienteRepositoryFake(cliente));
+
+        var result = await service.GerarPendentesAsync(
+            new GerarLancamentosFinanceirosRequest { DataReferencia = new DateTime(2026, 4, 29) },
+            CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamento = Assert.Single(result.Data!);
+        Assert.Equal(new DateTime(2026, 5, 1), lancamento.DataVencimentoFinanceiro);
     }
 
     [Fact]
@@ -427,6 +472,27 @@ public class BackendQualityTests
 
         Assert.True(result.Success);
         Assert.Empty(result.Data!);
+    }
+
+    [Theory]
+    [InlineData(29)]
+    [InlineData(30)]
+    [InlineData(31)]
+    public async Task Financeiro_GeracaoPendentes_DeveUsarUltimoDiaValidoEmMesesCurtos(int diaPagamentoPreferido)
+    {
+        var clienteId = Guid.NewGuid();
+        var cliente = CreateClienteParaGeracaoPendente(clienteId, diaPagamentoPreferido);
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(),
+            new ClienteRepositoryFake(cliente));
+
+        var result = await service.GerarPendentesAsync(
+            new GerarLancamentosFinanceirosRequest { DataReferencia = new DateTime(2026, 2, 25) },
+            CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamento = Assert.Single(result.Data!);
+        Assert.Equal(new DateTime(2026, 2, 28), lancamento.DataVencimentoFinanceiro);
     }
 
     [Fact]
@@ -472,6 +538,23 @@ public class BackendQualityTests
         var result = await service.GetResumoAsync(CancellationToken.None);
 
         Assert.True(result.Success);
+    }
+
+    private static Cliente CreateClienteParaGeracaoPendente(Guid clienteId, int diaPagamentoPreferido)
+    {
+        return new Cliente
+        {
+            Id = clienteId,
+            Nome = "Cliente",
+            Ativo = true,
+            DiaPagamentoPreferido = diaPagamentoPreferido,
+            Telas =
+            [
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 45, Ativo = true },
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 55, Ativo = true },
+                new TelaCliente { Id = Guid.NewGuid(), ValorAcordado = 90, Ativo = false }
+            ]
+        };
     }
 
     private sealed class ClienteRepositoryFake(params Cliente[] clientes) : IClienteRepository

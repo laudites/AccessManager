@@ -171,13 +171,17 @@ public class LancamentoFinanceiroService(
         CancellationToken cancellationToken)
     {
         var dataReferencia = (request.DataReferencia ?? DateTime.UtcNow).Date;
-        var dataVencimentoAlvo = dataReferencia.AddDays(5);
+        var limiteGeracao = dataReferencia.AddDays(5);
         var clientes = await clienteRepository.GetAllAsync(cancellationToken);
         var gerados = new List<LancamentoFinanceiro>();
 
         foreach (var cliente in clientes.Where(cliente => cliente.Ativo && cliente.DiaPagamentoPreferido is not null))
         {
-            if (cliente.DiaPagamentoPreferido != dataVencimentoAlvo.Day)
+            var dataVencimentoFinanceiro = CalculateProximoVencimentoFinanceiro(
+                dataReferencia,
+                cliente.DiaPagamentoPreferido!.Value);
+
+            if (dataVencimentoFinanceiro > limiteGeracao)
             {
                 continue;
             }
@@ -190,7 +194,7 @@ public class LancamentoFinanceiroService(
 
             var exists = await lancamentoFinanceiroRepository.ExistsByClienteAndVencimentoAsync(
                 cliente.Id,
-                dataVencimentoAlvo,
+                dataVencimentoFinanceiro,
                 cancellationToken);
 
             if (exists)
@@ -203,10 +207,10 @@ public class LancamentoFinanceiroService(
                 Id = Guid.NewGuid(),
                 ClienteId = cliente.Id,
                 TelaClienteId = null,
-                CompetenciaReferencia = CalculateCompetenciaReferencia(dataVencimentoAlvo),
+                CompetenciaReferencia = CalculateCompetenciaReferencia(dataVencimentoFinanceiro),
                 Descricao = $"Mensalidade {cliente.Nome}",
                 Valor = valorAgrupado,
-                DataVencimentoFinanceiro = dataVencimentoAlvo,
+                DataVencimentoFinanceiro = dataVencimentoFinanceiro,
                 StatusFinanceiro = StatusFinanceiro.Pendente,
                 Observacao = "Gerado automaticamente por regra de vencimento.",
                 DataCriacao = DateTime.UtcNow
@@ -330,6 +334,31 @@ public class LancamentoFinanceiroService(
     private static DateTime CalculateCompetenciaReferencia(DateTime dataVencimentoFinanceiro)
     {
         return new DateTime(dataVencimentoFinanceiro.Year, dataVencimentoFinanceiro.Month, 1);
+    }
+
+    private static DateTime CalculateProximoVencimentoFinanceiro(DateTime dataReferencia, int diaPagamentoPreferido)
+    {
+        var dataReferenciaNormalizada = dataReferencia.Date;
+        var vencimentoMesAtual = CreateDataVencimento(
+            dataReferenciaNormalizada.Year,
+            dataReferenciaNormalizada.Month,
+            diaPagamentoPreferido);
+
+        if (vencimentoMesAtual >= dataReferenciaNormalizada)
+        {
+            return vencimentoMesAtual;
+        }
+
+        var proximoMes = dataReferenciaNormalizada.AddMonths(1);
+
+        return CreateDataVencimento(proximoMes.Year, proximoMes.Month, diaPagamentoPreferido);
+    }
+
+    private static DateTime CreateDataVencimento(int year, int month, int diaPagamentoPreferido)
+    {
+        var diaValido = Math.Min(diaPagamentoPreferido, DateTime.DaysInMonth(year, month));
+
+        return new DateTime(year, month, diaValido);
     }
 
     private static LancamentoFinanceiroDto MapToDto(LancamentoFinanceiro lancamento)
