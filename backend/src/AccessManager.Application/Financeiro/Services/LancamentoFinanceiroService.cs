@@ -237,8 +237,13 @@ public class LancamentoFinanceiroService(
         CancellationToken cancellationToken)
     {
         var lancamentos = await lancamentoFinanceiroRepository.GetPendentesAsync(cancellationToken);
+        var hoje = DateTime.UtcNow.Date;
 
-        return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Ok(lancamentos.Select(MapToDto).ToArray());
+        return OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>.Ok(
+            lancamentos
+                .Where(lancamento => CalculateStatusFinanceiroExibicao(lancamento, hoje) == StatusFinanceiro.Pendente)
+                .Select(MapToDto)
+                .ToArray());
     }
 
     public async Task<OperationResult<IReadOnlyCollection<LancamentoFinanceiroDto>>> GetAtrasadosAsync(
@@ -368,6 +373,8 @@ public class LancamentoFinanceiroService(
 
     private static LancamentoFinanceiroDto MapToDto(LancamentoFinanceiro lancamento, Cliente? cliente)
     {
+        var hoje = DateTime.UtcNow.Date;
+
         return new LancamentoFinanceiroDto
         {
             Id = lancamento.Id,
@@ -381,9 +388,25 @@ public class LancamentoFinanceiroService(
             DataVencimentoFinanceiro = lancamento.DataVencimentoFinanceiro,
             DataPagamento = lancamento.DataPagamento,
             StatusFinanceiro = lancamento.StatusFinanceiro,
+            StatusFinanceiroExibicao = CalculateStatusFinanceiroExibicao(lancamento, hoje),
             Observacao = lancamento.Observacao,
             DataCriacao = lancamento.DataCriacao
         };
+    }
+
+    private static StatusFinanceiro CalculateStatusFinanceiroExibicao(LancamentoFinanceiro lancamento, DateTime hoje)
+    {
+        if (lancamento.StatusFinanceiro is StatusFinanceiro.Pago or StatusFinanceiro.Cancelado or StatusFinanceiro.Atrasado)
+        {
+            return lancamento.StatusFinanceiro;
+        }
+
+        if (lancamento.DataPagamento is null && lancamento.DataVencimentoFinanceiro.Date < hoje)
+        {
+            return StatusFinanceiro.Atrasado;
+        }
+
+        return lancamento.StatusFinanceiro;
     }
 
     private static string? NormalizeOptionalText(string? value)

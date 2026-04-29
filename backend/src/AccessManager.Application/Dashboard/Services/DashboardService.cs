@@ -42,7 +42,7 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
             TotalTelasVencidas = telas.Count(tela => IsTelaVencida(tela, hoje)),
             TotalTelasVencendo = telas.Count(tela => IsTelaVencendo(tela, hoje, limiteVencendo)),
             TotalTelasAtivas = telas.Count(tela => IsTelaAtiva(tela, limiteVencendo)),
-            TotalLancamentosPendentes = lancamentos.Count(IsLancamentoPendente),
+            TotalLancamentosPendentes = lancamentos.Count(lancamento => IsLancamentoPendente(lancamento, hoje)),
             TotalLancamentosAtrasados = lancamentos.Count(lancamento => IsLancamentoAtrasado(lancamento, hoje)),
             TotalEmAberto = lancamentos
                 .Where(IsLancamentoEmAberto)
@@ -93,9 +93,11 @@ public class DashboardService(IDashboardRepository dashboardRepository) : IDashb
         return tela.DataVencimentoTecnico.Date > limiteVencendo;
     }
 
-    private static bool IsLancamentoPendente(LancamentoFinanceiro lancamento)
+    private static bool IsLancamentoPendente(LancamentoFinanceiro lancamento, DateTime hoje)
     {
-        return lancamento.StatusFinanceiro == StatusFinanceiro.Pendente;
+        return lancamento.StatusFinanceiro == StatusFinanceiro.Pendente &&
+            lancamento.DataPagamento is null &&
+            lancamento.DataVencimentoFinanceiro.Date >= hoje;
     }
 
     private static bool IsLancamentoAtrasado(LancamentoFinanceiro lancamento, DateTime hoje)

@@ -15,6 +15,7 @@ public class LancamentoFinanceiroDto
     public DateTime DataVencimentoFinanceiro { get; set; }
     public DateTime? DataPagamento { get; set; }
     public StatusFinanceiro StatusFinanceiro { get; set; }
+    public StatusFinanceiro StatusFinanceiroExibicao { get; set; }
     public string? Observacao { get; set; }
     public DateTime DataCriacao { get; set; }
 }

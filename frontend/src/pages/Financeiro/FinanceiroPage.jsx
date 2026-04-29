@@ -83,6 +83,10 @@ function getStatusBadge(status) {
   return getStatusOption(status)?.badge ?? 'text-bg-secondary'
 }
 
+function getStatusExibicao(lancamento) {
+  return lancamento?.statusFinanceiroExibicao ?? lancamento?.statusFinanceiro
+}
+
 function getClienteById(clientes, id) {
   return clientes.find((cliente) => cliente.id === id)
 }
@@ -547,8 +551,8 @@ function FinanceiroPage() {
                         </td>
                         <td>{lancamento.clienteNome || getClienteById(clientes, lancamento.clienteId)?.nome || '-'}</td>
                         <td>
-                          <span className={`badge ${getStatusBadge(lancamento.statusFinanceiro)}`}>
-                            {getStatusLabel(lancamento.statusFinanceiro)}
+                          <span className={`badge ${getStatusBadge(getStatusExibicao(lancamento))}`}>
+                            {getStatusLabel(getStatusExibicao(lancamento))}
                           </span>
                         </td>
                         <td>{formatDate(lancamento.dataVencimentoFinanceiro)}</td>
@@ -605,6 +609,12 @@ function FinanceiroPage() {
                   <dl className="row mb-0">
                     <dt className="col-sm-5">Competencia</dt>
                     <dd className="col-sm-7">{formatDate(selectedLancamento.competenciaReferencia)}</dd>
+                    <dt className="col-sm-5">Status exibido</dt>
+                    <dd className="col-sm-7">
+                      <span className={`badge ${getStatusBadge(getStatusExibicao(selectedLancamento))}`}>
+                        {getStatusLabel(getStatusExibicao(selectedLancamento))}
+                      </span>
+                    </dd>
                     <dt className="col-sm-5">Data pagamento</dt>
                     <dd className="col-sm-7">{formatDate(selectedLancamento.dataPagamento)}</dd>
                     <dt className="col-sm-5">Data criacao</dt>

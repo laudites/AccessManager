@@ -360,6 +360,107 @@ public class BackendQualityTests
     }
 
     [Fact]
+    public async Task Financeiro_DeveRetornarStatusFinanceiroExibicaoCalculadoSemAlterarStatusSalvo()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var pendenteVencido = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje.AddDays(-1)
+        };
+        var pendenteHoje = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje
+        };
+        var pendenteFuturo = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje.AddDays(1)
+        };
+        var pagoVencido = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pago,
+            DataPagamento = hoje,
+            DataVencimentoFinanceiro = hoje.AddDays(-1)
+        };
+        var canceladoVencido = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Cancelado,
+            DataVencimentoFinanceiro = hoje.AddDays(-1)
+        };
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(pendenteVencido, pendenteHoje, pendenteFuturo, pagoVencido, canceladoVencido),
+            new ClienteRepositoryFake());
+
+        var result = await service.GetAllAsync(null, null, null, null, null, CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamentos = result.Data!.ToDictionary(lancamento => lancamento.Id);
+        Assert.Equal(StatusFinanceiro.Pendente, lancamentos[pendenteVencido.Id].StatusFinanceiro);
+        Assert.Equal(StatusFinanceiro.Atrasado, lancamentos[pendenteVencido.Id].StatusFinanceiroExibicao);
+        Assert.Equal(StatusFinanceiro.Pendente, lancamentos[pendenteHoje.Id].StatusFinanceiroExibicao);
+        Assert.Equal(StatusFinanceiro.Pendente, lancamentos[pendenteFuturo.Id].StatusFinanceiroExibicao);
+        Assert.Equal(StatusFinanceiro.Pago, lancamentos[pagoVencido.Id].StatusFinanceiroExibicao);
+        Assert.Equal(StatusFinanceiro.Cancelado, lancamentos[canceladoVencido.Id].StatusFinanceiroExibicao);
+    }
+
+    [Fact]
+    public async Task Financeiro_PendentesNaoDevemIncluirVencidosCalculadosComoAtrasado()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var vencido = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje.AddDays(-1)
+        };
+        var pendente = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje
+        };
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(vencido, pendente),
+            new ClienteRepositoryFake());
+
+        var result = await service.GetPendentesAsync(CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamento = Assert.Single(result.Data!);
+        Assert.Equal(pendente.Id, lancamento.Id);
+        Assert.Equal(StatusFinanceiro.Pendente, lancamento.StatusFinanceiroExibicao);
+    }
+
+    [Fact]
+    public async Task Financeiro_AtrasadosDevemIncluirPendentesVencidos()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var vencido = new LancamentoFinanceiro
+        {
+            Id = Guid.NewGuid(),
+            StatusFinanceiro = StatusFinanceiro.Pendente,
+            DataVencimentoFinanceiro = hoje.AddDays(-1)
+        };
+        var service = new LancamentoFinanceiroService(
+            new LancamentoFinanceiroRepositoryFake(vencido),
+            new ClienteRepositoryFake());
+
+        var result = await service.GetAtrasadosAsync(CancellationToken.None);
+
+        Assert.True(result.Success);
+        var lancamento = Assert.Single(result.Data!);
+        Assert.Equal(vencido.Id, lancamento.Id);
+        Assert.Equal(StatusFinanceiro.Atrasado, lancamento.StatusFinanceiroExibicao);
+    }
+
+    [Fact]
     public async Task Financeiro_GeracaoPendentes_DeveGerarQuandoFaltamMenosDeCincoDias()
     {
         var clienteId = Guid.NewGuid();
@@ -528,6 +629,34 @@ public class BackendQualityTests
         Assert.True(result.Success);
         Assert.Equal(100, result.Data!.RendimentoMensal);
         Assert.Equal(14, result.Data.CustoMensal);
+    }
+
+    [Fact]
+    public async Task Dashboard_NaoDeveDuplicarLancamentoVencidoEmPendentesEAtrasados()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var repository = new DashboardRepositoryFake(lancamentos:
+        [
+            new LancamentoFinanceiro
+            {
+                Id = Guid.NewGuid(),
+                StatusFinanceiro = StatusFinanceiro.Pendente,
+                DataVencimentoFinanceiro = hoje.AddDays(-1)
+            },
+            new LancamentoFinanceiro
+            {
+                Id = Guid.NewGuid(),
+                StatusFinanceiro = StatusFinanceiro.Pendente,
+                DataVencimentoFinanceiro = hoje
+            }
+        ]);
+        var service = new DashboardService(repository);
+
+        var result = await service.GetResumoAsync(CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.Data!.TotalLancamentosPendentes);
+        Assert.Equal(1, result.Data.TotalLancamentosAtrasados);
     }
 
     [Fact]
@@ -741,7 +870,11 @@ public class BackendQualityTests
         public Task<IReadOnlyCollection<LancamentoFinanceiro>> GetAtrasadosAsync(DateTime hoje, CancellationToken cancellationToken)
         {
             return Task.FromResult<IReadOnlyCollection<LancamentoFinanceiro>>(
-                _lancamentos.Where(lancamento => lancamento.DataVencimentoFinanceiro.Date < hoje).ToArray());
+                _lancamentos.Where(lancamento =>
+                    lancamento.StatusFinanceiro == StatusFinanceiro.Atrasado ||
+                    (lancamento.StatusFinanceiro == StatusFinanceiro.Pendente &&
+                        lancamento.DataPagamento is null &&
+                        lancamento.DataVencimentoFinanceiro.Date < hoje)).ToArray());
         }
 
         public Task<bool> ExistsByClienteAndVencimentoAsync(
