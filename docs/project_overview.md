@@ -59,6 +59,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Lancamentos financeiros por cliente com valor agrupado das telas ativas
 - Competencia financeira calculada automaticamente pelo backend
 - Filtro de lancamentos financeiros por mes e ano de vencimento
+- Status financeiro exibido/calculado separado do status salvo/manual
 - Status financeiro calculado por cliente no mes atual
 - Marcacao manual de pagamento
 - Consulta de lancamentos pendentes
@@ -107,6 +108,11 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Usar o ultimo dia valido em meses curtos.
 - Calcular `CompetenciaReferencia` internamente a partir de `DataVencimentoFinanceiro`.
 - Filtrar listagem por mes/ano usando `DataVencimentoFinanceiro`.
+- Manter `StatusFinanceiro` como status salvo/manual.
+- Exibir `StatusFinanceiroExibicao` calculado para apresentacao.
+- Preservar `Pago`, `Cancelado` e `Atrasado` quando forem o status salvo.
+- Exibir como `Atrasado` lancamentos pendentes vencidos, sem alterar o status salvo no banco.
+- Excluir pendentes vencidos da listagem de pendentes e incluir esses registros na listagem de atrasados.
 - Executar geracao automatica diaria de pendencias por BackgroundService da API, mantendo o endpoint manual.
 - Evitar duplicidade de pendencias para o mesmo cliente e vencimento financeiro.
 
@@ -128,6 +134,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Exibir creditos por servidor.
 - Exibir clientes/telas por servidor.
 - Exibir clientes pendentes no financeiro.
+- Separar lancamentos pendentes e atrasados sem duplicar vencidos calculados como atrasados.
 - Apoiar leitura de margem operacional pela comparacao entre rendimento mensal e custo mensal.
 
 ---

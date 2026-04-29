@@ -122,6 +122,7 @@ Observacoes praticas:
 - DataVencimentoFinanceiro (DateTime)
 - DataPagamento (DateTime?)
 - StatusFinanceiro (enum)
+- StatusFinanceiroExibicao (enum, somente DTO/consulta)
 - Observacao (string?)
 - DataCriacao (DateTime)
 
@@ -131,11 +132,18 @@ Observacoes praticas:
 - `TelaClienteId` e opcional para manter compatibilidade historica, mas o fluxo principal atual e por cliente.
 - `Valor` e calculado pelo backend pela soma das telas ativas do cliente.
 - `StatusFinanceiro` padrao na criacao e `Pendente` quando nao informado.
+- `StatusFinanceiro` e persistido como status salvo/manual.
+- `StatusFinanceiroExibicao` nao e persistido; e calculado no DTO financeiro para listagem/detalhe.
+- `StatusFinanceiroExibicao` preserva `Pago`, `Cancelado` e `Atrasado`.
+- Para lancamento `Pendente`, sem `DataPagamento`, com `DataVencimentoFinanceiro` anterior a hoje, `StatusFinanceiroExibicao` retorna `Atrasado`.
+- Como `StatusFinanceiroExibicao` e campo de DTO/consulta, essa mudanca nao exige migration.
 - `CompetenciaReferencia` e calculada automaticamente a partir de `DataVencimentoFinanceiro`.
 - Marcar como pago define `StatusFinanceiro = Pago` e preenche `DataPagamento`.
 - Pagamento nao altera a tela, nao renova vencimento tecnico e nao cria historico tecnico.
 - `DataVencimentoFinanceiro` representa a data acordada com o cliente.
 - A listagem financeira pode ser filtrada por mes e ano usando `DataVencimentoFinanceiro`.
+- A listagem de pendentes exclui vencidos calculados como atrasados.
+- A listagem de atrasados inclui status salvo `Atrasado` e pendentes vencidos por data.
 - Existe mecanismo manual/endpoint e BackgroundService para gerar lancamento pendente antes do vencimento financeiro acordado.
 - A geracao usa `DiaPagamentoPreferido` do cliente para calcular o proximo vencimento financeiro real.
 - Se faltarem ate 5 dias para o proximo vencimento, a rotina cria lancamento `Pendente`.
@@ -155,6 +163,7 @@ Observacoes praticas:
 - Existem consultas para creditos por servidor.
 - Existem consultas para clientes/telas por servidor.
 - Existe consulta para clientes pendentes no financeiro.
+- As consultas do dashboard separam pendentes e atrasados para nao duplicar lancamentos vencidos.
 
 ---
 

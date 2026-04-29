@@ -62,6 +62,7 @@ Implementado:
 - CRUD financeiro manual
 - Marcacao manual de pagamento
 - Listagens financeiras de pendentes e atrasados
+- Financeiro retorna status salvo/manual e status exibido/calculado separadamente
 - Dashboard com resumo operacional e financeiro
 - Dashboard financeiro exibe rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor e pendencias
 - Geracao de pendencias financeiras usa `DiaPagamentoPreferido` e proximo vencimento real do cliente
@@ -116,6 +117,14 @@ Observacao importante: a pagina de historico existe no frontend, mas a visualiza
 - `TelaClienteId` e opcional no lancamento financeiro
 - Pode haver divida mesmo com tela ativa
 - Valor financeiro deve ser maior que zero
+- `StatusFinanceiro` e o status salvo/manual do lancamento financeiro
+- `StatusFinanceiroExibicao` e calculado para apresentacao, sem sobrescrever `StatusFinanceiro`
+- `StatusFinanceiroExibicao` preserva `Pago`, `Cancelado` e `Atrasado`
+- Se `StatusFinanceiro` for `Pendente`, `DataPagamento` for null e `DataVencimentoFinanceiro` < hoje, `StatusFinanceiroExibicao` deve ser `Atrasado`
+- Pendentes nao devem incluir lancamentos vencidos calculados como atrasados
+- Atrasados devem incluir lancamentos salvos como `Atrasado` e pendentes vencidos por data
+- Dashboard nao deve duplicar o mesmo lancamento em pendentes e atrasados
+- Frontend Financeiro deve exibir badges/listagem/detalhe por `StatusFinanceiroExibicao`, mas criar/editar por `StatusFinanceiro`
 - Geracao de lancamentos pendentes usa `DiaPagamentoPreferido` para calcular o proximo vencimento real
 - Se faltarem ate 5 dias para o proximo vencimento financeiro, gera lancamento `Pendente`
 - `DataVencimentoFinanceiro` recebe o proximo dia de pagamento calculado

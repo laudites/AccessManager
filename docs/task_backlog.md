@@ -35,6 +35,11 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - Meses curtos usam o ultimo dia valido quando o dia preferido nao existe.
 - Duplicidade evitada por `ClienteId` + `DataVencimentoFinanceiro`.
 - Filtro por mes/ano na listagem financeira, considerando `DataVencimentoFinanceiro`.
+- `StatusFinanceiro` salvo/manual separado de `StatusFinanceiroExibicao` calculado para apresentacao.
+- Lancamento pendente vencido e exibido como atrasado sem sobrescrever o status salvo no banco.
+- Listagem de pendentes exclui vencidos calculados como atrasados.
+- Listagem de atrasados inclui pendentes vencidos por data.
+- Frontend Financeiro usa o status exibido nos badges/listagem/detalhe e mantem formularios usando o status salvo/manual.
 - Pagamento manual mantido.
 - Pagamento nao renova tela.
 - Financeiro continua separado do tecnico.
@@ -57,6 +62,7 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - Creditos por servidor.
 - Quantidade de clientes/telas em cada servidor.
 - Lista de clientes/pessoas pendentes no financeiro.
+- Contagem de pendentes e atrasados sem duplicar lancamentos vencidos calculados como atrasados.
 
 ### Implementado: geracao automatica real
 

@@ -35,6 +35,11 @@ GET /api/clientes/{id}
 - Endpoints de telas retornam `StatusExibicao` como status calculado para apresentacao.
 - `StatusExibicao` preserva `Cancelado` e `Suspenso`; nos demais casos usa `DataVencimentoTecnico` para retornar `Vencido`, `Vencendo` ou `Ativo`.
 - Endpoints financeiros expoem criacao/consulta por cliente, com valor agrupado das telas ativas.
+- Endpoints financeiros retornam `StatusFinanceiro` como status salvo/manual.
+- Endpoints financeiros retornam `StatusFinanceiroExibicao` como status calculado para apresentacao.
+- `StatusFinanceiroExibicao` preserva `Pago`, `Cancelado` e `Atrasado`; pendentes sem pagamento e com `DataVencimentoFinanceiro` anterior a hoje retornam `Atrasado`.
+- `GET /api/lancamentos-financeiros/pendentes` nao deve retornar lancamentos vencidos calculados como atrasados.
+- `GET /api/lancamentos-financeiros/atrasados` deve retornar lancamentos salvos como `Atrasado` e pendentes vencidos por data.
 - `CompetenciaReferencia` nao e campo de entrada do usuario nos DTOs publicos.
 - `DataVencimentoFinanceiro` deve ser campo de entrada para representar a data acordada de pagamento.
 - A listagem de lancamentos financeiros aceita filtros opcionais por `mes` e `ano`, considerando `DataVencimentoFinanceiro`.
@@ -44,3 +49,4 @@ GET /api/clientes/{id}
 - A geracao evita duplicidade por `ClienteId` + `DataVencimentoFinanceiro`.
 - `GET /api/clientes` e `GET /api/clientes/{id}` devem manter o status financeiro calculado no contrato de resposta, sem exigir campo de entrada do usuario.
 - Dashboard expoe dados agregados para rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor, clientes/telas por servidor e pendencias financeiras por cliente.
+- Dashboard deve separar pendentes e atrasados sem contar o mesmo lancamento vencido nos dois grupos.

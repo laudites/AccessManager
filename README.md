@@ -145,6 +145,7 @@ npm run build
 - CRUD de lancamentos financeiros
 - Marcacao manual de pagamento
 - Listagem de pendentes e atrasados
+- Status financeiro exibido/calculado separado do status salvo/manual
 - Dashboard com totais de clientes, telas, vencimentos e valores em aberto
 - Clientes exibem quantidade de telas e valor agrupado das telas ativas
 - Servidores usam quantidade de creditos e valor de custo por credito
@@ -166,6 +167,14 @@ npm run build
 
 ### Financeiro
 
+- `StatusFinanceiro` e o status salvo/manual do lancamento.
+- `StatusFinanceiroExibicao` e calculado pelo backend para apresentacao, sem sobrescrever o status salvo.
+- `StatusFinanceiroExibicao` preserva `Pago`, `Cancelado` e `Atrasado` quando estes forem o status salvo.
+- Lancamento salvo como `Pendente`, sem `DataPagamento`, com `DataVencimentoFinanceiro` anterior a hoje, e exibido como `Atrasado`.
+- A listagem de pendentes nao inclui vencidos calculados como atrasados.
+- A listagem de atrasados inclui lancamentos salvos como `Atrasado` e pendentes vencidos por data.
+- O dashboard nao conta o mesmo lancamento como pendente e atrasado.
+- No frontend Financeiro, badges/listagem/detalhe usam `StatusFinanceiroExibicao`; formularios continuam usando `StatusFinanceiro`.
 - A geracao de pendentes usa `DiaPagamentoPreferido` do cliente para calcular o proximo vencimento real.
 - Se faltarem ate 5 dias para esse vencimento, o sistema gera um lancamento `Pendente`.
 - `DataVencimentoFinanceiro` recebe o proximo dia de pagamento calculado.

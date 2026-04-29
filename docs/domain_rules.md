@@ -127,6 +127,13 @@ Regras implementadas:
 - ao criar lancamento sem status, o status padrao e `Pendente`
 - ao marcar como pago, status vira `Pago` e `DataPagamento` recebe a data atual em UTC
 - pagamento nao altera `DataVencimentoTecnico` da tela
+- `StatusFinanceiro` e o status salvo/manual do lancamento
+- `StatusFinanceiroExibicao` e calculado para apresentacao e nao sobrescreve `StatusFinanceiro`
+- `StatusFinanceiroExibicao` preserva `Pago`, `Cancelado` e `Atrasado`
+- Lancamento `Pendente`, sem `DataPagamento`, com `DataVencimentoFinanceiro` anterior a hoje, e exibido como `Atrasado`
+- A listagem de pendentes exclui lancamentos vencidos calculados como atrasados
+- A listagem de atrasados inclui lancamentos salvos como `Atrasado` e pendentes vencidos por data
+- O frontend Financeiro usa `StatusFinanceiroExibicao` em badges/listagem/detalhe; formularios usam `StatusFinanceiro`
 
 ### Geracao de pendentes
 
@@ -151,6 +158,7 @@ Regras implementadas:
 - Exibe resumo operacional e financeiro do MVP.
 - Classifica telas por vencimento tecnico.
 - Resume lancamentos pendentes, atrasados e total em aberto.
+- Nao duplica o mesmo lancamento entre pendentes e atrasados quando o status exibido e calculado por vencimento.
 - Exibe rendimento mensal.
 - Exibe custo mensal.
 - Exibe quantidade de clientes.
@@ -194,6 +202,15 @@ Um lancamento e considerado atrasado quando:
 
 - status e `Atrasado`; ou
 - nao possui pagamento, nao esta `Pago`, nao esta `Cancelado` e o vencimento financeiro e anterior a hoje.
+
+### Regra de calculo exibida
+
+- `StatusFinanceiro` salvo/manual permanece separado do status exibido.
+- Se `StatusFinanceiro` salvo for `Pago`, `Cancelado` ou `Atrasado` -> preservar esse status como exibicao.
+- Se `StatusFinanceiro` salvo for `Pendente`, `DataPagamento` for null e `DataVencimentoFinanceiro` < hoje -> Atrasado.
+- Caso contrario -> exibir o `StatusFinanceiro` salvo.
+
+Observacao: a exibicao usa essa regra sem gravar o resultado no status manual do lancamento.
 
 ---
 
