@@ -53,9 +53,10 @@ Implementado:
 - CRUD de telas
 - Filtros de telas por cliente e servidor
 - Clientes exibem quantidade de telas e valor total das telas ativas
+- Telas retornam status salvo/manual e status exibido/calculado separadamente
 - Servidores usam `QuantidadeCreditos` e `ValorCustoCredito`
 - Financeiro e por cliente e agrupa valores das telas ativas
-- Renovacao tecnica manual
+- Renovacao tecnica manual com sugestao de +30 dias no frontend
 - Troca manual de servidor
 - Historico persistido para renovacao e troca de servidor
 - CRUD financeiro manual
@@ -63,6 +64,8 @@ Implementado:
 - Listagens financeiras de pendentes e atrasados
 - Dashboard com resumo operacional e financeiro
 - Dashboard financeiro exibe rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor e pendencias
+- Geracao de pendencias financeiras usa `DiaPagamentoPreferido` e proximo vencimento real do cliente
+- BackgroundService executa a mesma geracao de pendencias do endpoint manual
 - Frontend React funcional com paginas de dashboard, clientes, servidores, telas, financeiro e historico
 
 Observacao importante: a pagina de historico existe no frontend, mas a visualizacao dedicada do historico ainda deve ser tratada como melhoria futura caso nao haja endpoint especifico exposto para consulta.
@@ -91,9 +94,15 @@ Observacao importante: a pagina de historico existe no frontend, mas a visualiza
 - Renovacao e manual
 - Troca de servidor e manual
 - Renovacao altera o vencimento tecnico e pode alterar o valor acordado
+- Na renovacao, o frontend sugere +30 dias a partir da maior data entre hoje e o vencimento tecnico atual
+- O calendario da renovacao permanece editavel
 - Troca de servidor altera apenas o servidor da tela
 - Renovacao e troca de servidor devem gerar historico
 - Pagamento financeiro nao altera vencimento tecnico
+- `Status` da tela e o status salvo/manual
+- `StatusExibicao` e calculado para apresentacao com base em `DataVencimentoTecnico`
+- `StatusExibicao` preserva `Cancelado` e `Suspenso`
+- Para os demais status, `StatusExibicao` e `Vencido` se `DataVencimentoTecnico` < hoje, `Vencendo` se estiver entre hoje e hoje + 3 dias, e `Ativo` caso contrario
 
 ---
 
@@ -107,7 +116,12 @@ Observacao importante: a pagina de historico existe no frontend, mas a visualiza
 - `TelaClienteId` e opcional no lancamento financeiro
 - Pode haver divida mesmo com tela ativa
 - Valor financeiro deve ser maior que zero
-- Geracao de lancamentos pendentes 5 dias antes do vencimento esta preparada como endpoint manual, sem job agendado real
+- Geracao de lancamentos pendentes usa `DiaPagamentoPreferido` para calcular o proximo vencimento real
+- Se faltarem ate 5 dias para o proximo vencimento financeiro, gera lancamento `Pendente`
+- `DataVencimentoFinanceiro` recebe o proximo dia de pagamento calculado
+- Meses curtos usam o ultimo dia valido do mes quando o dia preferido nao existe
+- A geracao evita duplicidade por `ClienteId` + `DataVencimentoFinanceiro`
+- Endpoint manual e BackgroundService usam o mesmo caso de uso
 
 ---
 
@@ -123,9 +137,8 @@ Observacao importante: a pagina de historico existe no frontend, mas a visualiza
 
 ## Proximas melhorias planejadas
 
-As regras principais de clientes, servidores, financeiro agrupado e dashboard financeiro ja foram implementadas. Pendencias futuras:
+As regras principais de clientes, servidores, financeiro agrupado, status tecnico exibido, geracao de pendencias e dashboard financeiro ja foram implementadas. Pendencias futuras:
 
-- Criar job/background service real para gerar pendencias automaticamente.
 - Expor endpoint e tela completa para historico tecnico.
 
 ---

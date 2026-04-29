@@ -50,9 +50,10 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - CRUD de servidores
 - CRUD de telas
 - Filtros de telas por cliente e servidor
+- Status exibido/calculado das telas separado do status salvo/manual
 - Clientes com quantidade de telas e valor agrupado das telas ativas
 - Servidores com creditos disponiveis/comprados e custo por credito
-- Renovacao tecnica manual de tela
+- Renovacao tecnica manual de tela com sugestao de +30 dias no frontend
 - Troca manual de servidor
 - Persistencia de historico para renovacao e troca de servidor
 - Lancamentos financeiros por cliente com valor agrupado das telas ativas
@@ -62,7 +63,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Marcacao manual de pagamento
 - Consulta de lancamentos pendentes
 - Consulta de lancamentos atrasados
-- Endpoint/manual service e BackgroundService para gerar pendentes 5 dias antes do vencimento acordado
+- Endpoint/manual service e BackgroundService para gerar pendentes pelo proximo vencimento real do cliente
 - Dashboard com resumo financeiro, rendimento mensal, custo mensal, creditos e telas por servidor
 - Testes unitarios de regras centrais e smoke tests de arquitetura
 
@@ -100,11 +101,23 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Mudar o lancamento financeiro para uma visao por cliente.
 - Gerar valor do lancamento pela soma das telas ativas do cliente.
 - Manter pagamento manual e separado da renovacao tecnica.
-- Gerar automaticamente lancamento pendente 5 dias antes do vencimento financeiro acordado.
+- Gerar automaticamente lancamento pendente quando faltam ate 5 dias para o proximo vencimento financeiro real.
+- Calcular o proximo vencimento com base em `DiaPagamentoPreferido`.
+- Usar o proximo mes quando o dia preferido ja passou no mes atual.
+- Usar o ultimo dia valido em meses curtos.
 - Calcular `CompetenciaReferencia` internamente a partir de `DataVencimentoFinanceiro`.
 - Filtrar listagem por mes/ano usando `DataVencimentoFinanceiro`.
 - Executar geracao automatica diaria de pendencias por BackgroundService da API, mantendo o endpoint manual.
 - Evitar duplicidade de pendencias para o mesmo cliente e vencimento financeiro.
+
+### Telas
+
+- Manter `Status` como status salvo/manual.
+- Exibir `StatusExibicao` calculado pela data de vencimento tecnico.
+- Preservar `Cancelado` e `Suspenso` como status exibido quando forem o status manual.
+- Classificar as demais telas como `Vencido`, `Vencendo` ou `Ativo` pela regra de vencimento tecnico.
+- Sugerir renovacao com +30 dias a partir da maior data entre hoje e o vencimento tecnico atual.
+- Manter o calendario de renovacao editavel.
 
 ### Dashboard
 

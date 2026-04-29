@@ -1,6 +1,6 @@
 # AccessManager
 
-Sistema interno para gestao de clientes, telas de acesso, servidores, renovacoes tecnicas e controle financeiro manual.
+Sistema interno para gestao de clientes, telas de acesso, servidores, renovacoes tecnicas e controle financeiro.
 
 ## Estado atual
 
@@ -138,7 +138,8 @@ npm run build
 - CRUD de servidores
 - CRUD de telas
 - Filtros de telas por cliente e servidor
-- Renovacao tecnica manual de tela
+- Status tecnico exibido/calculado para telas, separado do status salvo/manual
+- Renovacao tecnica manual de tela com sugestao automatica de +30 dias
 - Troca manual de servidor da tela
 - Historico gravado em renovacoes e trocas de servidor
 - CRUD de lancamentos financeiros
@@ -149,12 +150,32 @@ npm run build
 - Servidores usam quantidade de creditos e valor de custo por credito
 - Financeiro cria lancamentos por cliente, agrupando valores das telas ativas
 - Competencia financeira e calculada automaticamente pelo backend
-- Geracao manual de lancamentos pendentes preparada para a regra de 5 dias antes do vencimento
+- Geracao manual e automatica de lancamentos pendentes com base no dia de pagamento preferido do cliente
 - Dashboard com rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor e pendencias financeiras
+
+## Regras recentes importantes
+
+### Telas
+
+- `Status` e o status salvo/manual da tela.
+- `StatusExibicao` e calculado pelo backend para apresentacao, sem sobrescrever o status salvo.
+- `StatusExibicao` preserva `Cancelado` e `Suspenso`.
+- Para os demais status, usa `DataVencimentoTecnico`: vencido quando a data e anterior a hoje, vencendo quando esta entre hoje e hoje + 3 dias, e ativo nos demais casos.
+- Ao renovar, o frontend sugere nova data com +30 dias a partir da maior data entre hoje e o vencimento tecnico atual.
+- O calendario da renovacao continua editavel.
+
+### Financeiro
+
+- A geracao de pendentes usa `DiaPagamentoPreferido` do cliente para calcular o proximo vencimento real.
+- Se faltarem ate 5 dias para esse vencimento, o sistema gera um lancamento `Pendente`.
+- `DataVencimentoFinanceiro` recebe o proximo dia de pagamento calculado.
+- Em meses curtos, dias 29, 30 ou 31 usam o ultimo dia valido do mes.
+- O valor do lancamento e a soma das telas ativas do cliente.
+- A duplicidade e evitada por `ClienteId` + `DataVencimentoFinanceiro`.
+- Pagamento continua manual e nao renova tela.
 
 ## Proximas melhorias planejadas
 
-- Criar job/background service real para gerar pendencias automaticamente 5 dias antes do vencimento.
 - Expor consulta completa do historico tecnico.
 
 ## Fora do escopo atual

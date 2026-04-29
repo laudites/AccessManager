@@ -45,6 +45,12 @@ Regras implementadas:
 - data de vencimento tecnico e obrigatoria
 - status deve ser valido
 - textos opcionais vazios sao normalizados para `null`
+- `Status` e o status salvo/manual da tela
+- `StatusExibicao` e calculado pelo backend para apresentacao e nao sobrescreve `Status`
+- `StatusExibicao` preserva `Cancelado` e `Suspenso`
+- Para os demais status, `StatusExibicao` e `Vencido` quando `DataVencimentoTecnico` < hoje
+- Para os demais status, `StatusExibicao` e `Vencendo` quando `DataVencimentoTecnico` esta entre hoje e hoje + 3 dias
+- Para os demais status, `StatusExibicao` e `Ativo` quando nao estiver vencido nem vencendo
 
 ---
 
@@ -77,6 +83,8 @@ Regras implementadas:
 - novo valor acordado e opcional
 - se novo valor for informado, deve ser maior ou igual a zero
 - historico guarda vencimento anterior, novo vencimento, valor anterior, novo valor e observacao
+- no frontend, ao abrir a renovacao, a nova data sugerida e +30 dias sobre a maior data entre hoje e o vencimento tecnico atual
+- o campo de calendario permanece editavel pelo usuario
 
 ---
 
@@ -122,10 +130,15 @@ Regras implementadas:
 
 ### Geracao de pendentes
 
-- Existe endpoint/manual service para gerar lancamentos pendentes de clientes elegiveis 5 dias antes do vencimento acordado.
+- Existe endpoint/manual service para gerar lancamentos pendentes de clientes elegiveis.
 - Existe BackgroundService na API para executar a mesma geracao automaticamente todos os dias.
-- A geracao evita duplicar lancamento para o mesmo cliente e vencimento.
-- A geracao usa `DiaPagamentoPreferido` para identificar clientes cujo vencimento financeiro ocorre em 5 dias.
+- A geracao usa `DiaPagamentoPreferido` para calcular o proximo vencimento real do cliente.
+- Se o dia preferido ja passou no mes atual, o vencimento calculado usa o proximo mes.
+- Se o mes nao possuir o dia preferido, o vencimento calculado usa o ultimo dia valido do mes.
+- A janela de geracao e inclusiva entre hoje e hoje + 5 dias.
+- Quando o proximo vencimento esta nessa janela, `DataVencimentoFinanceiro` recebe esse proximo dia de pagamento.
+- O valor gerado e a soma de `ValorAcordado` das telas ativas do cliente.
+- A geracao evita duplicar lancamento para o mesmo `ClienteId` + `DataVencimentoFinanceiro`.
 - Lancamentos gerados automaticamente iniciam como `Pendente`.
 - A rotina automatica nao marca pagamentos, nao renova telas e nao altera vencimentos tecnicos.
 
@@ -156,13 +169,15 @@ Regras implementadas:
 - Suspenso
 - Cancelado
 
-### Regra de calculo usada no dashboard
+### Regra de calculo exibida
 
+- `Status` salvo/manual permanece separado do status exibido.
+- Se `Status` salvo for `Cancelado` ou `Suspenso` -> preservar esse status como exibicao.
 - Se `DataVencimentoTecnico` < hoje -> Vencido
 - Se `DataVencimentoTecnico` >= hoje e <= hoje + 3 dias -> Vencendo
 - Se `DataVencimentoTecnico` > hoje + 3 dias -> Ativo
 
-Observacao: o dashboard classifica vencimento pela data tecnica, independentemente do status salvo na tela.
+Observacao: a exibicao usa essa regra sem gravar o resultado no status manual da tela.
 
 ---
 

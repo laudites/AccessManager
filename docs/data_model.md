@@ -66,6 +66,7 @@ Observacoes praticas:
 - DataInicio (DateTime)
 - DataVencimentoTecnico (DateTime)
 - Status (enum)
+- StatusExibicao (enum, somente DTO/consulta)
 - MarcaTv (string)
 - AppUtilizado (string)
 - MacOuIdApp (string?)
@@ -78,7 +79,10 @@ Observacoes praticas:
 - Tela e a principal unidade operacional do sistema.
 - `ClienteId` e `ServidorId` devem apontar para registros existentes.
 - `ValorAcordado` aceita zero, mas nao aceita valor negativo.
-- `DataVencimentoTecnico` controla as classificacoes de vencida, vencendo e ativa no dashboard.
+- `Status` e persistido como status salvo/manual.
+- `StatusExibicao` nao e persistido; e calculado no DTO de tela para listagem/detalhe.
+- `StatusExibicao` preserva `Cancelado` e `Suspenso`.
+- Para os demais status, `DataVencimentoTecnico` controla as classificacoes: `Vencido` se anterior a hoje, `Vencendo` se entre hoje e hoje + 3 dias, e `Ativo` caso contrario.
 - `MacOuIdApp`, `ChaveSecundaria` e `Observacao` sao opcionais e strings vazias sao normalizadas para `null`.
 - Financeiro da tela e registrado separadamente em `LancamentoFinanceiro`.
 
@@ -132,8 +136,13 @@ Observacoes praticas:
 - Pagamento nao altera a tela, nao renova vencimento tecnico e nao cria historico tecnico.
 - `DataVencimentoFinanceiro` representa a data acordada com o cliente.
 - A listagem financeira pode ser filtrada por mes e ano usando `DataVencimentoFinanceiro`.
-- Existe mecanismo manual/endpoint e BackgroundService para gerar lancamento pendente 5 dias antes do vencimento financeiro acordado.
-- A geracao automatica usa `DiaPagamentoPreferido` do cliente para calcular o vencimento financeiro alvo.
+- Existe mecanismo manual/endpoint e BackgroundService para gerar lancamento pendente antes do vencimento financeiro acordado.
+- A geracao usa `DiaPagamentoPreferido` do cliente para calcular o proximo vencimento financeiro real.
+- Se faltarem ate 5 dias para o proximo vencimento, a rotina cria lancamento `Pendente`.
+- Se o dia preferido ja passou no mes atual, o vencimento alvo usa o proximo mes.
+- Se o mes nao possuir o dia preferido, o vencimento alvo usa o ultimo dia valido do mes.
+- `DataVencimentoFinanceiro` recebe o proximo dia de pagamento calculado.
+- O valor gerado e a soma das telas ativas do cliente.
 - A duplicidade e evitada por cliente e `DataVencimentoFinanceiro`, ignorando lancamentos cancelados na verificacao atual.
 
 ---

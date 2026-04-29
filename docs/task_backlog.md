@@ -28,12 +28,25 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - Valor agrupado automaticamente pelas telas ativas do cliente.
 - `CompetenciaReferencia` calculada automaticamente pelo backend a partir de `DataVencimentoFinanceiro`.
 - `DataVencimentoFinanceiro` usada como data acordada com o cliente.
-- Endpoint/manual service para gerar lancamento pendente 5 dias antes do vencimento acordado.
+- Endpoint/manual service para gerar lancamento pendente pelo proximo vencimento real do cliente.
 - BackgroundService na API para executar a geracao real de pendencias automaticamente todos os dias.
+- Geracao usa `DiaPagamentoPreferido` do cliente.
+- Geracao cria pendencia quando faltam ate 5 dias para o proximo vencimento.
+- Meses curtos usam o ultimo dia valido quando o dia preferido nao existe.
+- Duplicidade evitada por `ClienteId` + `DataVencimentoFinanceiro`.
 - Filtro por mes/ano na listagem financeira, considerando `DataVencimentoFinanceiro`.
 - Pagamento manual mantido.
 - Pagamento nao renova tela.
 - Financeiro continua separado do tecnico.
+
+### Implementado: Telas
+
+- `Status` salvo/manual mantido separado do status exibido.
+- `StatusExibicao` calculado pela `DataVencimentoTecnico`.
+- `Cancelado` e `Suspenso` preservados como status exibido quando forem o status manual.
+- Demais telas exibem `Vencido`, `Vencendo` ou `Ativo` conforme vencimento tecnico.
+- Renovacao sugere automaticamente +30 dias a partir da maior data entre hoje e vencimento atual.
+- Calendario de renovacao permanece editavel.
 
 ### Implementado: Dashboard financeiro
 
@@ -47,7 +60,7 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 
 ### Implementado: geracao automatica real
 
-- BackgroundService real criado na API para gerar pendencias 5 dias antes do vencimento acordado.
+- BackgroundService real criado na API para gerar pendencias com base no proximo vencimento real do cliente.
 - Endpoint/manual service mantido para execucao manual.
 - Regra de duplicidade mantida por cliente e vencimento financeiro.
 - Rotina automatica mantida sem integracao externa e sem alterar renovacao tecnica.
