@@ -127,6 +127,7 @@ Regras implementadas:
 - A geracao evita duplicar lancamento para o mesmo cliente e vencimento.
 - A geracao usa `DiaPagamentoPreferido` para identificar clientes cujo vencimento financeiro ocorre em 5 dias.
 - Lancamentos gerados automaticamente iniciam como `Pendente`.
+- A rotina automatica nao marca pagamentos, nao renova telas e nao altera vencimentos tecnicos.
 
 ---
 

@@ -50,6 +50,7 @@ A Fase 1 foi concluida. Este arquivo agora registra melhorias futuras, nao taref
 - BackgroundService real criado na API para gerar pendencias 5 dias antes do vencimento acordado.
 - Endpoint/manual service mantido para execucao manual.
 - Regra de duplicidade mantida por cliente e vencimento financeiro.
+- Rotina automatica mantida sem integracao externa e sem alterar renovacao tecnica.
 
 ### Historico tecnico
 

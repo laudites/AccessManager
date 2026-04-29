@@ -366,6 +366,7 @@ public class TelaClienteService(
             DataInicio = telaCliente.DataInicio,
             DataVencimentoTecnico = telaCliente.DataVencimentoTecnico,
             Status = telaCliente.Status,
+            StatusExibicao = CalcularStatusExibicao(telaCliente),
             MarcaTv = telaCliente.MarcaTv,
             AppUtilizado = telaCliente.AppUtilizado,
             MacOuIdApp = telaCliente.MacOuIdApp,
@@ -373,6 +374,29 @@ public class TelaClienteService(
             Observacao = telaCliente.Observacao,
             Ativo = telaCliente.Ativo
         };
+    }
+
+    private static StatusTela CalcularStatusExibicao(TelaCliente telaCliente)
+    {
+        if (telaCliente.Status is StatusTela.Cancelado or StatusTela.Suspenso)
+        {
+            return telaCliente.Status;
+        }
+
+        var hoje = DateTime.UtcNow.Date;
+        var dataVencimentoTecnico = telaCliente.DataVencimentoTecnico.Date;
+
+        if (dataVencimentoTecnico < hoje)
+        {
+            return StatusTela.Vencido;
+        }
+
+        if (dataVencimentoTecnico <= hoje.AddDays(3))
+        {
+            return StatusTela.Vencendo;
+        }
+
+        return StatusTela.Ativo;
     }
 
     private static string? NormalizeOptionalText(string? value)

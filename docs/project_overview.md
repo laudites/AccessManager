@@ -104,6 +104,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Calcular `CompetenciaReferencia` internamente a partir de `DataVencimentoFinanceiro`.
 - Filtrar listagem por mes/ano usando `DataVencimentoFinanceiro`.
 - Executar geracao automatica diaria de pendencias por BackgroundService da API, mantendo o endpoint manual.
+- Evitar duplicidade de pendencias para o mesmo cliente e vencimento financeiro.
 
 ### Dashboard
 
@@ -114,6 +115,7 @@ Backend implementado em .NET 8 com Clean Architecture, EF Core e MySQL. Frontend
 - Exibir creditos por servidor.
 - Exibir clientes/telas por servidor.
 - Exibir clientes pendentes no financeiro.
+- Apoiar leitura de margem operacional pela comparacao entre rendimento mensal e custo mensal.
 
 ---
 

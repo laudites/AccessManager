@@ -36,4 +36,5 @@ GET /api/clientes/{id}
 - `DataVencimentoFinanceiro` deve ser campo de entrada para representar a data acordada de pagamento.
 - A listagem de lancamentos financeiros aceita filtros opcionais por `mes` e `ano`, considerando `DataVencimentoFinanceiro`.
 - A geracao de lancamento pendente 5 dias antes do vencimento possui endpoint manual em `POST /api/lancamentos-financeiros/gerar-pendentes` e tambem e executada automaticamente por BackgroundService da API.
+- `GET /api/clientes` e `GET /api/clientes/{id}` devem manter o status financeiro calculado no contrato de resposta, sem exigir campo de entrada do usuario.
 - Dashboard expoe dados agregados para rendimento mensal, custo mensal, clientes pagos no mes, creditos por servidor, clientes/telas por servidor e pendencias financeiras por cliente.

@@ -117,6 +117,58 @@ public class BackendQualityTests
     }
 
     [Fact]
+    public async Task TelaCliente_DeveRetornarStatusExibicaoCalculadoSemAlterarStatusSalvo()
+    {
+        var hoje = DateTime.UtcNow.Date;
+        var telaVencida = new TelaCliente
+        {
+            Id = Guid.NewGuid(),
+            Status = StatusTela.Ativo,
+            DataVencimentoTecnico = hoje.AddDays(-1)
+        };
+        var telaSuspensa = new TelaCliente
+        {
+            Id = Guid.NewGuid(),
+            Status = StatusTela.Suspenso,
+            DataVencimentoTecnico = hoje.AddDays(-1)
+        };
+        var telaCancelada = new TelaCliente
+        {
+            Id = Guid.NewGuid(),
+            Status = StatusTela.Cancelado,
+            DataVencimentoTecnico = hoje.AddDays(-1)
+        };
+        var telaVencendo = new TelaCliente
+        {
+            Id = Guid.NewGuid(),
+            Status = StatusTela.Ativo,
+            DataVencimentoTecnico = hoje.AddDays(3)
+        };
+        var telaValida = new TelaCliente
+        {
+            Id = Guid.NewGuid(),
+            Status = StatusTela.Vencido,
+            DataVencimentoTecnico = hoje.AddDays(4)
+        };
+        var service = new TelaClienteService(
+            new TelaClienteRepositoryFake(telaVencida, telaSuspensa, telaCancelada, telaVencendo, telaValida),
+            new RenovacaoTelaHistoricoRepositoryFake(),
+            new ClienteRepositoryFake(),
+            new ServidorRepositoryFake());
+
+        var result = await service.GetAllAsync(null, null, CancellationToken.None);
+
+        Assert.True(result.Success);
+        var telas = result.Data!.ToDictionary(tela => tela.Id);
+        Assert.Equal(StatusTela.Ativo, telas[telaVencida.Id].Status);
+        Assert.Equal(StatusTela.Vencido, telas[telaVencida.Id].StatusExibicao);
+        Assert.Equal(StatusTela.Suspenso, telas[telaSuspensa.Id].StatusExibicao);
+        Assert.Equal(StatusTela.Cancelado, telas[telaCancelada.Id].StatusExibicao);
+        Assert.Equal(StatusTela.Vencendo, telas[telaVencendo.Id].StatusExibicao);
+        Assert.Equal(StatusTela.Ativo, telas[telaValida.Id].StatusExibicao);
+    }
+
+    [Fact]
     public async Task Dashboard_DeveClassificarTelasVencidasVencendoEAtivasPelaDataTecnica()
     {
         var hoje = DateTime.UtcNow.Date;

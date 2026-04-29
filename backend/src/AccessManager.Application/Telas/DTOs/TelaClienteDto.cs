@@ -14,6 +14,7 @@ public class TelaClienteDto
     public DateTime DataInicio { get; set; }
     public DateTime DataVencimentoTecnico { get; set; }
     public StatusTela Status { get; set; }
+    public StatusTela StatusExibicao { get; set; }
     public string MarcaTv { get; set; } = string.Empty;
     public string AppUtilizado { get; set; } = string.Empty;
     public string? MacOuIdApp { get; set; }

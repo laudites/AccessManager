@@ -26,6 +26,7 @@ Observacoes praticas:
 - DTOs de listagem/detalhe de cliente incluem status financeiro calculado para o mes atual.
 - Esses campos podem ser calculados por consulta/projecao e nao precisam necessariamente ser persistidos na tabela `Cliente`.
 - O status financeiro do cliente usa a prioridade: `Atrasado` > `Pendente` > `Pago` > `Sem lançamento`.
+- O status financeiro do cliente e informacao de apresentacao/consulta e nao altera `Ativo` do cliente.
 
 ---
 
@@ -133,6 +134,7 @@ Observacoes praticas:
 - A listagem financeira pode ser filtrada por mes e ano usando `DataVencimentoFinanceiro`.
 - Existe mecanismo manual/endpoint e BackgroundService para gerar lancamento pendente 5 dias antes do vencimento financeiro acordado.
 - A geracao automatica usa `DiaPagamentoPreferido` do cliente para calcular o vencimento financeiro alvo.
+- A duplicidade e evitada por cliente e `DataVencimentoFinanceiro`, ignorando lancamentos cancelados na verificacao atual.
 
 ---
 

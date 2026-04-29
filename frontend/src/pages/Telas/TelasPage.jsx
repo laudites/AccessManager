@@ -62,6 +62,31 @@ function toDateInputValue(value) {
   return value.slice(0, 10)
 }
 
+function toLocalDateInputValue(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function addDaysToDateInputValue(value, days) {
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+
+  date.setDate(date.getDate() + days)
+
+  return toLocalDateInputValue(date)
+}
+
+function getRenovacaoSuggestedDate(tela) {
+  const today = toLocalDateInputValue(new Date())
+  const currentDueDate = toDateInputValue(tela?.dataVencimentoTecnico)
+  const baseDate = currentDueDate && currentDueDate > today ? currentDueDate : today
+
+  return addDaysToDateInputValue(baseDate, 30)
+}
+
 function formatDate(value) {
   if (!value) {
     return '-'
@@ -82,6 +107,10 @@ function getStatusLabel(status) {
 
 function getStatusBadge(status) {
   return getStatusOption(status)?.badge ?? 'text-bg-secondary'
+}
+
+function getStatusExibicao(tela) {
+  return tela?.statusExibicao ?? tela?.statusCalculado ?? tela?.status
 }
 
 function toFormData(tela) {
@@ -315,7 +344,7 @@ function TelasPage() {
     setMode('view')
     setTechnicalAction('renovacao')
     setRenovacaoForm({
-      novaDataVencimentoTecnico: toDateInputValue(selectedTela.dataVencimentoTecnico),
+      novaDataVencimentoTecnico: getRenovacaoSuggestedDate(selectedTela),
       valorAcordadoNovo: '',
       observacao: '',
     })
@@ -616,31 +645,35 @@ function TelasPage() {
                       </td>
                     </tr>
                   ) : (
-                    sortedTelas.map((tela) => (
-                      <tr key={tela.id}>
-                        <td>
-                          <div>{tela.nomeIdentificacao}</div>
-                          <div className="text-muted small">{currencyFormatter.format(tela.valorAcordado ?? 0)}</div>
-                        </td>
-                        <td>{getNameById(clientes, tela.clienteId)}</td>
-                        <td>{getNameById(servidores, tela.servidorId)}</td>
-                        <td>
-                          <span className={`badge ${getStatusBadge(tela.status)}`}>
-                            {getStatusLabel(tela.status)}
-                          </span>
-                        </td>
-                        <td>{formatDate(tela.dataVencimentoTecnico)}</td>
-                        <td className="text-end">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            type="button"
-                            onClick={() => handleViewTela(tela.id)}
-                          >
-                            Ver
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    sortedTelas.map((tela) => {
+                      const statusExibicao = getStatusExibicao(tela)
+
+                      return (
+                        <tr key={tela.id}>
+                          <td>
+                            <div>{tela.nomeIdentificacao}</div>
+                            <div className="text-muted small">{currencyFormatter.format(tela.valorAcordado ?? 0)}</div>
+                          </td>
+                          <td>{getNameById(clientes, tela.clienteId)}</td>
+                          <td>{getNameById(servidores, tela.servidorId)}</td>
+                          <td>
+                            <span className={`badge ${getStatusBadge(statusExibicao)}`}>
+                              {getStatusLabel(statusExibicao)}
+                            </span>
+                          </td>
+                          <td>{formatDate(tela.dataVencimentoTecnico)}</td>
+                          <td className="text-end">
+                            <button
+                              className="btn btn-sm btn-outline-primary"
+                              type="button"
+                              onClick={() => handleViewTela(tela.id)}
+                            >
+                              Ver
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })
                   )}
                 </tbody>
               </table>
@@ -680,6 +713,12 @@ function TelasPage() {
                   <dl className="row mb-0">
                     <dt className="col-sm-5">Data inicio</dt>
                     <dd className="col-sm-7">{formatDate(selectedTela.dataInicio)}</dd>
+                    <dt className="col-sm-5">Status exibido</dt>
+                    <dd className="col-sm-7">
+                      <span className={`badge ${getStatusBadge(getStatusExibicao(selectedTela))}`}>
+                        {getStatusLabel(getStatusExibicao(selectedTela))}
+                      </span>
+                    </dd>
                     <dt className="col-sm-5">Identificador</dt>
                     <dd className="col-sm-7 text-break">{selectedTela.id}</dd>
                   </dl>
